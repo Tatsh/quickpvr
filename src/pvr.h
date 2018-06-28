@@ -1,7 +1,7 @@
 /*******************************************************************************
   Copyright (c) 2009, Limbic Software, Inc.
   All rights reserved.
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
       * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
       * Neither the name of the Limbic Software, Inc. nor the
         names of its contributors may be used to endorse or promote products
         derived from this software without specific prior written permission.
-  
+
   THIS SOFTWARE IS PROVIDED BY LIMBIC SOFTWARE, INC. ''AS IS'' AND ANY
   EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -29,25 +29,23 @@
 
 #include <stdint.h>
 
-enum ePVRPixelType
-{
-    PVR_PIXELTYPE_MASK  = 0xff,
-    PVR_TYPE_RGBA4444   = 0x10,
-    PVR_TYPE_RGBA5551   = 0x11,
-    PVR_TYPE_RGBA8888   = 0x12,
-    PVR_TYPE_RGB565     = 0x13,
-    PVR_TYPE_RGB555     = 0x14,
-    PVR_TYPE_RGB888     = 0x15,
-    PVR_TYPE_I8         = 0x16,
-    PVR_TYPE_AI8        = 0x17,
-    PVR_TYPE_PVRTC2     = 0x18,
-    PVR_TYPE_PVRTC4     = 0x19,
+enum ePVRPixelType {
+    PVR_PIXELTYPE_MASK = 0xff,
+    PVR_TYPE_RGBA4444 = 0x10,
+    PVR_TYPE_RGBA5551 = 0x11,
+    PVR_TYPE_RGBA8888 = 0x12,
+    PVR_TYPE_RGB565 = 0x13,
+    PVR_TYPE_RGB555 = 0x14,
+    PVR_TYPE_RGB888 = 0x15,
+    PVR_TYPE_I8 = 0x16,
+    PVR_TYPE_AI8 = 0x17,
+    PVR_TYPE_PVRTC2 = 0x18,
+    PVR_TYPE_PVRTC4 = 0x19,
 
-    PVR_MAX_TYPE        = 0x20,
+    PVR_MAX_TYPE = 0x20,
 };
 
-enum ePVRLoadResult
-{
+enum ePVRLoadResult {
     PVR_LOAD_OKAY,
     PVR_LOAD_INVALID_FILE,
     PVR_LOAD_MORE_THAN_ONE_SURFACE,
@@ -56,15 +54,14 @@ enum ePVRLoadResult
     PVR_LOAD_UNKNOWN_ERROR,
 };
 
-struct PVRTexture
-{
+struct PVRTexture {
     PVRTexture();
     ~PVRTexture();
     ePVRLoadResult load(const char *const path);
-    ePVRLoadResult loadPVR2(uint8_t* data, int size);
-    ePVRLoadResult loadPVR3(uint8_t* data, int size);
+    ePVRLoadResult loadPVR2(uint8_t *data, int size);
+    ePVRLoadResult loadPVR3(uint8_t *data, int size);
 
-    bool loadApplePVRTC(uint8_t* data, int size);
+    bool loadApplePVRTC(uint8_t *data, int size);
 
     unsigned int width;
     unsigned int height;
