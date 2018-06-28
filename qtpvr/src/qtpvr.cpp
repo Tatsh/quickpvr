@@ -55,6 +55,7 @@ qtpvr::qtpvr(QWidget *parent, const char *imagePath) :
         QImage::Format format = getFormatFromString(pvr.format);
 
         if (format == QImage::Format_Invalid) {
+            qDebug("Invalid pixel format");
             return;
         }
 
