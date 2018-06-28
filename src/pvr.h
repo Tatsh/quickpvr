@@ -61,7 +61,6 @@ enum ePVRLoadResult {
     PVR_LOAD_UNKNOWN_ERROR,
 };
 
-
 struct EXPORT PVRTexture {
     PVRTexture();
     ~PVRTexture();

@@ -1,19 +1,18 @@
 #ifndef QTPVR_H
 #define QTPVR_H
 
-#include <QMainWindow>
 #include <QGraphicsScene>
+#include <QMainWindow>
 
 namespace Ui {
 class qtpvr;
 }
 
-class qtpvr : public QMainWindow
-{
+class qtpvr : public QMainWindow {
     Q_OBJECT
 
 public:
-    qtpvr ( QWidget* parent, const char* imagePath = 0 );
+    qtpvr(QWidget *parent, const char *imagePath = 0);
     ~qtpvr();
 
 private:
