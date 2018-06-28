@@ -7,7 +7,7 @@ CXX := g++
 DESTDIR := /usr
 LIBDIR := $(DESTDIR)/lib
 INCDIR := $(DESTDIR)/include
-OBJECTS = pvr.o
+OBJECTS = pvr.o pvrtc.o
 
 all: $(LIBNAME).$(LIBEXTENSION)
 
@@ -32,7 +32,7 @@ $(LIBNAME).$(LIBEXTENSION).$(LIBVERSION_SHORT): $(LIBNAME).$(LIBEXTENSION).$(LIB
 $(LIBNAME).$(LIBEXTENSION).$(LIBVERSION): $(OBJECTS)
 	$(CXX) -shared -Wl,-soname,$(LIBNAME).$(LIBEXTENSION).$(LIBVERSION_SHORT) -o $(LIBNAME).$(LIBEXTENSION).$(LIBVERSION) $(OBJECTS)
 
-$(OBJECTS): %.o:%.cc
+$(OBJECTS):%.o:%.cc
 	$(CXX) $(CXXFLAGS) -fvisibility=hidden -fPIC -c $< -o $@
 
 clean:

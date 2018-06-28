@@ -29,6 +29,13 @@
 
 #include <stdint.h>
 
+// https://msdn.microsoft.com/en-us/library/a3140177.aspx
+#if defined(_MSC_VER)
+#define EXPORT
+#else
+#define EXPORT __attribute__((visibility("default")))
+#endif // _MSC_VER
+
 enum ePVRPixelType {
     PVR_PIXELTYPE_MASK = 0xff,
     PVR_TYPE_RGBA4444 = 0x10,
@@ -54,7 +61,8 @@ enum ePVRLoadResult {
     PVR_LOAD_UNKNOWN_ERROR,
 };
 
-struct PVRTexture {
+
+struct EXPORT PVRTexture {
     PVRTexture();
     ~PVRTexture();
     ePVRLoadResult load(const char *const path);
