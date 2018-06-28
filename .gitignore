@@ -8,3 +8,4 @@ project.xcworkspace
 *.swo
 *.o
 *.so*
+/qtpvr/build/
