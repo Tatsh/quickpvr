@@ -6,3 +6,5 @@ xcuserdata
 project.xcworkspace
 *.swp
 *.swo
+*.o
+*.so*
