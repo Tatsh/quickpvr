@@ -371,7 +371,7 @@ ePVRLoadResult PVRTexture::load(const char *const path) {
         return PVR_LOAD_FILE_NOT_FOUND;
 
     fseek(fp, 0, SEEK_END);
-    length = ftell(fp);
+    length = (unsigned int)ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
     data = (uint8_t *)malloc(length);
