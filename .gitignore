@@ -9,3 +9,4 @@ project.xcworkspace
 *.o
 *.so*
 /qtpvr/build/
+*.dylib
