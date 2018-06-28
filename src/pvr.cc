@@ -1,7 +1,7 @@
 /*******************************************************************************
   Copyright (c) 2009, Limbic Software, Inc.
   All rights reserved.
-  
+
   Redistribution and use in source and binary forms, with or without
   modification, are permitted provided that the following conditions are met:
       * Redistributions of source code must retain the above copyright
@@ -12,7 +12,7 @@
       * Neither the name of the Limbic Software, Inc. nor the
         names of its contributors may be used to endorse or promote products
         derived from this software without specific prior written permission.
-  
+
   THIS SOFTWARE IS PROVIDED BY LIMBIC SOFTWARE, INC. ''AS IS'' AND ANY
   EXPRESS OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
   WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE ARE
@@ -103,7 +103,7 @@ PVRTexture::~PVRTexture()
 bool PVRTexture::loadApplePVRTC(uint8_t* data, int size)
 {
     // additional heuristic
-    if(size>sizeof(PVRHeader))
+    if((size_t)size>sizeof(PVRHeader))
     {
         PVRHeader *header = (PVRHeader *)data;
         if( header->size == sizeof( PVRHeader )
@@ -187,7 +187,7 @@ bool PVRTexture::loadApplePVRTC(uint8_t* data, int size)
 }
 
 ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
-    if(length<sizeof(PVRHeader))
+    if((size_t)length<sizeof(PVRHeader))
     {
         free(data);
         return PVR_LOAD_INVALID_FILE;
@@ -211,12 +211,12 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         free( data );
         return PVR_LOAD_INVALID_FILE;
     }
-    
+
     if(header->numtex<1)
     {
         header->numtex = (header->flags & PVRTEX_CUBEMAP)?6:1;
     }
-    
+
     if( header->numtex != 1 )
     {
         free( data );
@@ -252,8 +252,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 int v1 = *in++;
                 int v2 = *in++;
@@ -274,8 +274,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 unsigned short v = *(unsigned short*)in;
                 in += 2;
@@ -296,8 +296,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 *out++ = *in++;
                 *out++ = *in++;
@@ -310,12 +310,12 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 short v = *(short*)in;
                 in += 2;
-                
+
 
                 uint8_t b = (v&0x001f)<<3;
                 uint8_t g = (v&0x07e0)>>3;
@@ -327,7 +327,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
                     printf("%04x\n", v);
                     printf("%i %i %i\n", r, g, b);
                 }
-                
+
                 *out++ = r;
                 *out++ = g;
                 *out++ = b;
@@ -339,8 +339,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 short v = *(short*)in;
                 in += 2;
@@ -361,8 +361,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 *out++ = *in++;
                 *out++ = *in++;
@@ -375,8 +375,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 int i = *in++;
 
@@ -391,8 +391,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         {
             uint8_t *in  = p;
             uint8_t *out = this->data;
-            for(int y=0; y<this->height; ++y)
-            for(int x=0; x<this->width; ++x)
+            for(unsigned int y=0; y<this->height; ++y)
+            for(unsigned int x=0; x<this->width; ++x)
             {
                 int i = *in++;
                 int a = *in++;
@@ -558,7 +558,7 @@ static const std::map<uint64_t, FormatInfo> kFormats({
 });
 
 ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
-  if (length < sizeof(PVR3Header)) {
+  if ((size_t)length < sizeof(PVR3Header)) {
     return PVR_LOAD_INVALID_FILE;
   }
   PVR3Header *header = reinterpret_cast<PVR3Header*>(data);
@@ -600,8 +600,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
   case PVR3TAG(0, 0, 0, 8,   0,   0,   0, 'i'): {
     uint8_t *in  = p;
     uint8_t *out = this->data;
-    for(int y=0; y<this->height; ++y)
-    for(int x=0; x<this->width; ++x)
+    for(unsigned int y=0; y<this->height; ++y)
+    for(unsigned int x=0; x<this->width; ++x)
     {
         int i = *in++;
 
@@ -615,8 +615,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
   case PVR3TAG(0, 0, 8, 8,   0,   0, 'i', 'a'): {
     uint8_t *in  = p;
     uint8_t *out = this->data;
-    for(int y=0; y<this->height; ++y)
-    for(int x=0; x<this->width; ++x)
+    for(unsigned int y=0; y<this->height; ++y)
+    for(unsigned int x=0; x<this->width; ++x)
     {
         int i = *in++;
         int a = *in++;
@@ -631,8 +631,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
   case PVR3TAG(4, 4, 4, 4, 'a', 'b', 'g', 'r'): {
     uint8_t *in  = p;
     uint8_t *out = this->data;
-    for(int y=0; y<this->height; ++y) {
-      for(int x=0; x<this->width; ++x) {
+    for(unsigned int y=0; y<this->height; ++y) {
+      for(unsigned int x=0; x<this->width; ++x) {
         int v1 = *in++;
         int v2 = *in++;
         uint8_t a = (v1&0x0f)<<4;
@@ -650,8 +650,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
   case PVR3TAG(0, 8, 8, 8,  0, 'b', 'g', 'r'): {
     uint8_t *in  = p;
     uint8_t *out = this->data;
-    for(int y=0; y<this->height; ++y)
-    for(int x=0; x<this->width; ++x) {
+    for(unsigned int y=0; y<this->height; ++y)
+    for(unsigned int x=0; x<this->width; ++x) {
       *out++ = *in++;
       *out++ = *in++;
       *out++ = *in++;
@@ -662,8 +662,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
   case PVR3TAG(8, 8, 8, 8, 'a', 'b', 'g', 'r'): {
     uint8_t *in  = p;
     uint8_t *out = this->data;
-    for(int y=0; y<this->height; ++y)
-    for(int x=0; x<this->width; ++x) {
+    for(unsigned int y=0; y<this->height; ++y)
+    for(unsigned int x=0; x<this->width; ++x) {
       *out++ = *in++;
       *out++ = *in++;
       *out++ = *in++;
@@ -674,8 +674,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
   case PVR3TAG(0, 5, 6, 5,   0, 'b', 'g', 'r'): {
     uint8_t *in  = p;
     uint8_t *out = this->data;
-    for(int y=0; y<this->height; ++y) {
-      for(int x=0; x<this->width; ++x) {
+    for(unsigned int y=0; y<this->height; ++y) {
+      for(unsigned int x=0; x<this->width; ++x) {
         short v = *(short*)in;
         in += 2;
         uint8_t b = (v&0x001f)<<3;
