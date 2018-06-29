@@ -36,14 +36,35 @@ typedef struct {
 #define BLK_X_4BPP 4
 
 #define _ASSERT(X) assert(X)
-#define POWER_OF_2(X) util_number_is_power_2(X)
-#define CLAMP(X, lower, upper) (_MIN(_MAX((X), (lower)), (upper)))
 
-#define _MIN(X, Y) (((X) < (Y)) ? (X) : (Y))
-#define _MAX(X, Y) (((X) > (Y)) ? (X) : (Y))
-#define WRAP_COORD(Val, Size) ((Val) & ((Size)-1))
-#define LIMIT_COORD(Val, Size, AssumeImageTiles)                                                                       \
-    ((AssumeImageTiles) ? WRAP_COORD((Val), (Size)) : CLAMP((Val), 0, (Size)-1))
+static inline int min(int x, int y) {
+    if (x < y) {
+        return x;
+    }
+    return y;
+}
+
+static inline int max(int x, int y) {
+    if (x > y) {
+        return x;
+    }
+    return y;
+}
+
+static inline int clamp(int x, int lower, int upper) {
+    return min(max(x, lower), upper);
+}
+
+static inline int wrap_coord(int val, int size) {
+    return val & (size - 1);
+}
+
+static inline int limit_coord(int val, int size, bool assume_image_tiles) {
+    if (assume_image_tiles) {
+        return wrap_coord(val, size);
+    }
+    return clamp(val, 0, size - 1);
+}
 
 /******************************************************************************
  * Function Name: util_number_is_power_2
@@ -135,7 +156,7 @@ static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock, int ABColours[2][4
             /*
             // grab the 3(+padding) or 4 bits of blue and add an extra padding bit
             */
-            ABColours[i][2] = (RawBits[i] & 0xF) << 1;
+            ABColours[i][2] = (int)((RawBits[i] & 0xF) << 1);
 
             /*
             // expand from 3 to 5 bits if this is from colour A, or 4 to 5 bits if from
@@ -261,7 +282,8 @@ static void InterpolateColours(const int ColourP[4],
                                const int x,
                                const int y,
                                int Result[4]) {
-    int u, v, uscale;
+    int u, v;
+    int uscale;
     int k;
 
     int tmp1, tmp2;
@@ -468,8 +490,8 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_
     _ASSERT(YPos < YSize);
     _ASSERT(XPos < XSize);
 
-    _ASSERT(POWER_OF_2(YSize));
-    _ASSERT(POWER_OF_2(XSize));
+    _ASSERT(util_number_is_power_2(YSize));
+    _ASSERT(util_number_is_power_2(XSize));
 
     if (YSize < XSize) {
         MinDimension = YSize;
@@ -581,8 +603,8 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
     /*
     // For MBX don't allow the sizes to get too small
     */
-    BlkXDim = _MAX(2, XDim / XBlockSize);
-    BlkYDim = _MAX(2, YDim / BLK_Y_SIZE);
+    BlkXDim = max(2, XDim / XBlockSize);
+    BlkYDim = max(2, YDim / BLK_Y_SIZE);
 
     /*
     // Step through the pixels of the image decompressing each one in turn
@@ -597,8 +619,8 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             BlkX = (x - XBlockSize / 2);
             BlkY = (y - BLK_Y_SIZE / 2);
 
-            BlkX = LIMIT_COORD(BlkX, XDim, AssumeImageTiles);
-            BlkY = LIMIT_COORD(BlkY, YDim, AssumeImageTiles);
+            BlkX = limit_coord(BlkX, XDim, AssumeImageTiles);
+            BlkY = limit_coord(BlkY, YDim, AssumeImageTiles);
 
             BlkX /= XBlockSize;
             BlkY /= BLK_Y_SIZE;
@@ -609,16 +631,16 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             /*
             // compute the positions of the other 3 blocks
             */
-            BlkXp1 = LIMIT_COORD(BlkX + 1, BlkXDim, AssumeImageTiles);
-            BlkYp1 = LIMIT_COORD(BlkY + 1, BlkYDim, AssumeImageTiles);
+            BlkXp1 = limit_coord(BlkX + 1, BlkXDim, AssumeImageTiles);
+            BlkYp1 = limit_coord(BlkY + 1, BlkYDim, AssumeImageTiles);
 
             /*
             // Map to block memory locations
             */
-            pBlocks[0][0] = pCompressedData + TwiddleUV(BlkYDim, BlkXDim, BlkY, BlkX);
-            pBlocks[0][1] = pCompressedData + TwiddleUV(BlkYDim, BlkXDim, BlkY, BlkXp1);
-            pBlocks[1][0] = pCompressedData + TwiddleUV(BlkYDim, BlkXDim, BlkYp1, BlkX);
-            pBlocks[1][1] = pCompressedData + TwiddleUV(BlkYDim, BlkXDim, BlkYp1, BlkXp1);
+            pBlocks[0][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkX);
+            pBlocks[0][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkXp1);
+            pBlocks[1][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkX);
+            pBlocks[1][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkXp1);
 
             /*
             // extract the colours and the modulation information IF the previous values
@@ -683,7 +705,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             /*
             // Store the result in the output image
             */
-            uPosition = (x + y * XDim) << 2;
+            uPosition = (unsigned int)((x + y * XDim) << 2);
             pResultImage[uPosition + 0] = (uint8_t)Result[0];
             pResultImage[uPosition + 1] = (uint8_t)Result[1];
             pResultImage[uPosition + 2] = (uint8_t)Result[2];

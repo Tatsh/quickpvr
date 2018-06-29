@@ -88,10 +88,10 @@ PVRTexture::~PVRTexture() {
         free(this->data);
 }
 
-bool PVRTexture::loadApplePVRTC(uint8_t *data, int size) {
+bool PVRTexture::loadApplePVRTC(uint8_t *data2, int size) {
     // additional heuristic
     if ((size_t)size > sizeof(PVRHeader)) {
-        PVRHeader *header = (PVRHeader *)data;
+        PVRHeader *header = (PVRHeader *)data2;
         if (header->size == sizeof(PVRHeader) && (header->magic == 0x21525650))
             // this looks more like a PowerVR file.
             return false;
@@ -139,13 +139,13 @@ bool PVRTexture::loadApplePVRTC(uint8_t *data, int size) {
     }
 
     // there is no reliable way to know if it's a 2bpp or 4bpp file. Assuming
-    this->width = res;
-    this->height = res;
-    this->bpp = (mode + 1) * 2;
+    this->width = (unsigned int)res;
+    this->height = (unsigned int)res;
+    this->bpp = (unsigned int)((mode + 1) * 2);
     this->numMips = 0;
     this->data = (uint8_t *)malloc(this->width * this->height * 4);
 
-    Decompress((AMTC_BLOCK_STRUCT *)data, mode, this->width, this->height, 0, this->data);
+    Decompress((AMTC_BLOCK_STRUCT *)data2, mode, (int)this->width, (int)this->height, 0, this->data);
 
     for (int y = 0; y < res / 2; ++y)
         for (int x = 0; x < res; ++x) {
@@ -162,24 +162,24 @@ bool PVRTexture::loadApplePVRTC(uint8_t *data, int size) {
     return true;
 }
 
-ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
+ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data2, int length) {
     if ((size_t)length < sizeof(PVRHeader)) {
-        free(data);
+        free(data2);
         return PVR_LOAD_INVALID_FILE;
     }
 
     // parse the header
-    uint8_t *p = data;
+    uint8_t *p = data2;
     PVRHeader *header = (PVRHeader *)p;
     p += sizeof(PVRHeader);
 
     if (header->size != sizeof(PVRHeader)) {
-        free(data);
+        free(data2);
         return PVR_LOAD_INVALID_FILE;
     }
 
     if (header->magic != 0x21525650) {
-        free(data);
+        free(data2);
         return PVR_LOAD_INVALID_FILE;
     }
 
@@ -188,11 +188,11 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
     }
 
     if (header->numtex != 1) {
-        free(data);
+        free(data2);
         return PVR_LOAD_MORE_THAN_ONE_SURFACE;
     }
 
-    if (header->width * header->height * header->bpp / 8 > length - sizeof(PVRHeader)) {
+    if (header->width * header->height * header->bpp / 8 > ((unsigned long)length) - sizeof(PVRHeader)) {
         return PVR_LOAD_INVALID_FILE;
     }
 
@@ -223,10 +223,10 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
                 int v1 = *in++;
                 int v2 = *in++;
 
-                uint8_t a = (v1 & 0x0f) << 4;
-                uint8_t b = (v1 & 0xf0);
-                uint8_t g = (v2 & 0x0f) << 4;
-                uint8_t r = (v2 & 0xf0);
+                uint8_t a = (uint8_t)((v1 & 0x0f) << 4);
+                uint8_t b = (uint8_t)(v1 & 0xf0);
+                uint8_t g = (uint8_t)((v2 & 0x0f) << 4);
+                uint8_t r = (uint8_t)(v2 & 0xf0);
 
                 *out++ = r;
                 *out++ = g;
@@ -244,7 +244,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
 
                 uint8_t r = (v & 0xf800) >> 8;
                 uint8_t g = (v & 0x07c0) >> 3;
-                uint8_t b = (v & 0x003e) << 2;
+                uint8_t b = (uint8_t)((v & 0x003e) << 2);
                 uint8_t a = (v & 0x0001) ? 255 : 0;
 
                 *out++ = r;
@@ -272,7 +272,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
                 short v = *(short *)in;
                 in += 2;
 
-                uint8_t b = (v & 0x001f) << 3;
+                uint8_t b = (uint8_t)((v & 0x001f) << 3);
                 uint8_t g = (v & 0x07e0) >> 3;
                 uint8_t r = (v & 0xf800) >> 8;
                 uint8_t a = 255;
@@ -296,7 +296,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
                 short v = *(short *)in;
                 in += 2;
 
-                uint8_t r = (v & 0x001f) << 3;
+                uint8_t r = (uint8_t)((v & 0x001f) << 3);
                 uint8_t g = (v & 0x03e0) >> 2;
                 uint8_t b = (v & 0x7c00) >> 7;
                 uint8_t a = 255;
@@ -323,7 +323,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         uint8_t *out = this->data;
         for (unsigned int y = 0; y < this->height; ++y)
             for (unsigned int x = 0; x < this->width; ++x) {
-                int i = *in++;
+                uint8_t i = *in++;
 
                 *out++ = i;
                 *out++ = i;
@@ -336,8 +336,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
         uint8_t *out = this->data;
         for (unsigned int y = 0; y < this->height; ++y)
             for (unsigned int x = 0; x < this->width; ++x) {
-                int i = *in++;
-                int a = *in++;
+                uint8_t i = *in++;
+                uint8_t a = *in++;
 
                 *out++ = i;
                 *out++ = i;
@@ -346,24 +346,24 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data, int length) {
             }
     } break;
     case PVR_TYPE_PVRTC2: {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 1, this->width, this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p, 1, (int)this->width, (int)this->height, 1, this->data);
     } break;
     case PVR_TYPE_PVRTC4: {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 0, this->width, this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p, 0, (int)this->width, (int)this->height, 1, this->data);
     } break;
     default:
         printf("unknown PVR type %i!\n", ptype);
         free(this->data);
         this->data = NULL;
-        free(data);
+        free(data2);
         return PVR_LOAD_UNKNOWN_TYPE;
     }
-    free(data);
+    free(data2);
     return PVR_LOAD_OKAY;
 }
 
 ePVRLoadResult PVRTexture::load(const char *const path) {
-    uint8_t *data;
+    uint8_t *data2;
     unsigned int length;
 
     FILE *fp = fopen(path, "rb");
@@ -374,27 +374,27 @@ ePVRLoadResult PVRTexture::load(const char *const path) {
     length = (unsigned int)ftell(fp);
     fseek(fp, 0, SEEK_SET);
 
-    data = (uint8_t *)malloc(length);
-    fread(data, 1, length, fp);
+    data2 = (uint8_t *)malloc(length);
+    fread(data2, 1, length, fp);
 
     fclose(fp);
 
     // use a heuristic to detect potential apple PVRTC formats
     if (countBits(length) == 1) {
         // very likely to be apple PVRTC
-        if (loadApplePVRTC(data, length))
+        if (loadApplePVRTC(data2, (int)length))
             return PVR_LOAD_OKAY;
     }
     if (length < 4) {
         return PVR_LOAD_INVALID_FILE;
     }
     // Detect which PVR file it is
-    uint32_t *magic = reinterpret_cast<uint32_t *>(data);
+    uint32_t *magic = reinterpret_cast<uint32_t *>(data2);
     if (magic[0] == 0x03525650) {
         // PVR3 format
-        return loadPVR3(data, length);
+        return loadPVR3(data2, (int)length);
     } else {
-        return loadPVR2(data, length);
+        return loadPVR2(data2, (int)length);
     }
 }
 
@@ -486,26 +486,26 @@ static const std::map<uint64_t, FormatInfo> kFormats({
     {PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_4BPP_RGBA), {4}},
 });
 
-ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
+ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data2, int length) {
     if ((size_t)length < sizeof(PVR3Header)) {
         return PVR_LOAD_INVALID_FILE;
     }
-    PVR3Header *header = reinterpret_cast<PVR3Header *>(data);
+    PVR3Header *header = reinterpret_cast<PVR3Header *>(data2);
     if (header->version != 0x03525650) {
         printf("PVR3: invalid header!\n");
         return PVR_LOAD_INVALID_FILE;
     }
     // Determine the format
     auto fit = kFormats.find(header->format);
-    FormatInfo format;
+    FormatInfo format_;
     if (fit != kFormats.end()) {
-        format = fit->second;
+        format_ = fit->second;
     } else {
         // More complicated or unsupported format!
-        char a = printascii(header->format_chars[0]);
-        char b = printascii(header->format_chars[1]);
-        char c = printascii(header->format_chars[2]);
-        char d = printascii(header->format_chars[3]);
+        char a = printascii((char)header->format_chars[0]);
+        char b = printascii((char)header->format_chars[1]);
+        char c = printascii((char)header->format_chars[2]);
+        char d = printascii((char)header->format_chars[3]);
         int e = header->format_chars[4];
         int f = header->format_chars[5];
         int g = header->format_chars[6];
@@ -527,21 +527,21 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
     this->width = header->width;
     this->height = header->height;
     this->numMips = header->mipcount;
-    this->bpp = format.bpp;
+    this->bpp = format_.bpp;
     this->should_flip = false;
     printf("Width: %i\n", this->width);
     printf("Height: %i\n", this->height);
     printf("BPP: %i\n", this->bpp);
     this->data = (uint8_t *)malloc(this->width * this->height * 4);
     // Read
-    uint8_t *p = data + sizeof(PVR3Header) + header->metadata_size;
+    uint8_t *p = data2 + sizeof(PVR3Header) + header->metadata_size;
     switch (header->format) {
     case PVR3TAG(0, 0, 0, 8, 0, 0, 0, 'i'): {
         uint8_t *in = p;
         uint8_t *out = this->data;
         for (unsigned int y = 0; y < this->height; ++y)
             for (unsigned int x = 0; x < this->width; ++x) {
-                int i = *in++;
+                uint8_t i = *in++;
 
                 *out++ = i;
                 *out++ = i;
@@ -555,8 +555,8 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
         uint8_t *out = this->data;
         for (unsigned int y = 0; y < this->height; ++y)
             for (unsigned int x = 0; x < this->width; ++x) {
-                int i = *in++;
-                int a = *in++;
+                uint8_t i = *in++;
+                uint8_t a = *in++;
 
                 *out++ = i;
                 *out++ = i;
@@ -572,10 +572,10 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
             for (unsigned int x = 0; x < this->width; ++x) {
                 int v1 = *in++;
                 int v2 = *in++;
-                uint8_t a = (v1 & 0x0f) << 4;
-                uint8_t b = (v1 & 0xf0);
-                uint8_t g = (v2 & 0x0f) << 4;
-                uint8_t r = (v2 & 0xf0);
+                uint8_t a = (uint8_t)((v1 & 0x0f) << 4);
+                uint8_t b = (uint8_t)(v1 & 0xf0);
+                uint8_t g = (uint8_t)((v2 & 0x0f) << 4);
+                uint8_t r = (uint8_t)(v2 & 0xf0);
                 *out++ = r;
                 *out++ = g;
                 *out++ = b;
@@ -615,9 +615,9 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
             for (unsigned int x = 0; x < this->width; ++x) {
                 short v = *(short *)in;
                 in += 2;
-                uint8_t b = (v & 0x001f) << 3;
-                uint8_t g = (v & 0x07e0) >> 3;
-                uint8_t r = (v & 0xf800) >> 8;
+                uint8_t b = (uint8_t)((v & 0x001f) << 3);
+                uint8_t g = (uint8_t)((v & 0x07e0) >> 3);
+                uint8_t r = (uint8_t)((v & 0xf800) >> 8);
                 uint8_t a = 255;
                 *out++ = r;
                 *out++ = g;
@@ -628,27 +628,27 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data, int length) {
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_2BPP_RGB): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 1, this->width, this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p, 1, (int)this->width, (int)this->height, 1, this->data);
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_4BPP_RGB): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 0, this->width, this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p, 0, (int)this->width, (int)this->height, 1, this->data);
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_2BPP_RGBA): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 1, this->width, this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p, 1, (int)this->width, (int)this->height, 1, this->data);
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_4BPP_RGBA): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 0, this->width, this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p, 0, (int)this->width, (int)this->height, 1, this->data);
         break;
     }
     default: {
         // More complicated or unsupported format!
-        char a = printascii(header->format_chars[0]);
-        char b = printascii(header->format_chars[1]);
-        char c = printascii(header->format_chars[2]);
-        char d = printascii(header->format_chars[3]);
+        char a = printascii((char)header->format_chars[0]);
+        char b = printascii((char)header->format_chars[1]);
+        char c = printascii((char)header->format_chars[2]);
+        char d = printascii((char)header->format_chars[3]);
         int e = header->format_chars[4];
         int f = header->format_chars[5];
         int g = header->format_chars[6];
