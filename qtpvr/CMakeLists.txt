@@ -19,8 +19,8 @@ set(qtpvr_SRC
 qt5_wrap_ui(qtpvr_SRC src/qtpvr.ui)
 
 # FIXME Remove this later. This is only for -lpvr/pvr.h
-include_directories(../src)
-find_library(PVR_LIB NAMES pvr PATHS ../src NO_DEFAULT_PATH)
+include_directories(../libpvr)
+find_library(PVR_LIB NAMES pvr PATHS ../libpvr NO_DEFAULT_PATH)
 
 # Tell CMake to create the helloworld executable
 add_executable(qtpvr ${qtpvr_SRC})
