@@ -31,6 +31,13 @@
 #include "pvr.h"
 #include <Cocoa/Cocoa.h>
 
+extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
+                               QLPreviewRequestRef preview,
+                               CFURLRef url,
+                               CFStringRef contentTypeUTI,
+                               CFDictionaryRef options);
+extern "C" void CancelPreviewGeneration(void *thisInterface, QLPreviewRequestRef preview);
+
 /* -----------------------------------------------------------------------------
    Generate a preview for file
 
@@ -45,15 +52,17 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
                                           CFURLRef url,
                                           CFStringRef contentTypeUTI,
                                           CFDictionaryRef options) {
-    NSAutoreleasePool *pool = [[NSAutoreleasePool alloc] init];
 
+    @autoreleasepool {
+        (void)thisInterface;
+        (void)contentTypeUTI;
+        (void)options;
     // Read the PVR file
     PVRTexture pvr;
 
-    NSString *targetCFS = [[(NSURL *)url absoluteURL] path];
+        NSString *targetCFS = [[(__bridge NSURL *)url absoluteURL] path];
     int res = pvr.load(targetCFS.UTF8String);
     if (res != PVR_LOAD_OKAY && res != PVR_LOAD_UNKNOWN_TYPE) {
-        [pool release];
         return noErr;
     }
 
@@ -72,16 +81,16 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
             [NSGraphicsContext setCurrentContext:context];
             [context saveGraphicsState];
 
-            int w = pvr.width;
-            int h = pvr.height;
+            unsigned int w = pvr.width;
+            unsigned  int h = pvr.height;
             if (pvr.data) {
                 uint8_t *buffer = pvr.data;
 
                 CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer, (w * h * 4), NULL);
 
-                int bitsPerComponent = 8;
-                int bitsPerPixel = 32;
-                int bytesPerRow = 4 * w;
+                unsigned int bitsPerComponent = 8;
+                unsigned int bitsPerPixel = 32;
+                unsigned int bytesPerRow = 4 * w;
                 CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
                 CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
                 CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
@@ -143,10 +152,12 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
         CFRelease(cgContext);
     }
 
-    [pool release];
     return noErr;
+    }
 }
 
 extern "C" void CancelPreviewGeneration(void *thisInterface, QLPreviewRequestRef preview) {
     // implement only if supported
+    (void)thisInterface;
+    (void)preview;
 }
