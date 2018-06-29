@@ -114,6 +114,10 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
                     CGContextScaleCTM(cgContext, 1.0f, -1.0f);
                     CGContextTranslateCTM(cgContext, 0.0f, -h);
                 }
+
+                CGDataProviderRelease(provider);
+                CGColorSpaceRelease(colorSpaceRef);
+                CGImageRelease(image);
             }
 
 #ifdef SHOW_INFO

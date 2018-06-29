@@ -110,6 +110,10 @@ extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
                     CGContextScaleCTM(cgContext, 1.0f, -1.0f);
                     CGContextTranslateCTM(cgContext, 0.0f, -h);
                 }
+
+                CGColorSpaceRelease(colorSpaceRef);
+                CGDataProviderRelease(provider);
+                CGImageRelease(image);
             }
             [context restoreGraphicsState];
             [NSGraphicsContext restoreGraphicsState];
