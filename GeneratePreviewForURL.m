@@ -32,10 +32,10 @@
 #include <Cocoa/Cocoa.h>
 
 extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
-                               QLPreviewRequestRef preview,
-                               CFURLRef url,
-                               CFStringRef contentTypeUTI,
-                               CFDictionaryRef options);
+                                          QLPreviewRequestRef preview,
+                                          CFURLRef url,
+                                          CFStringRef contentTypeUTI,
+                                          CFDictionaryRef options);
 extern "C" void CancelPreviewGeneration(void *thisInterface, QLPreviewRequestRef preview);
 
 /* -----------------------------------------------------------------------------
@@ -57,106 +57,107 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
         (void)thisInterface;
         (void)contentTypeUTI;
         (void)options;
-    // Read the PVR file
-    PVRTexture pvr;
+        // Read the PVR file
+        PVRTexture pvr;
 
         NSString *targetCFS = [[(__bridge NSURL *)url absoluteURL] path];
-    int res = pvr.load(targetCFS.UTF8String);
-    if (res != PVR_LOAD_OKAY && res != PVR_LOAD_UNKNOWN_TYPE) {
-        return noErr;
-    }
-
-    // create the render context
-#ifdef SHOW_INFO
-    NSSize canvasSize = NSMakeSize(pvr.width + 100, pvr.height);
-#else
-    NSSize canvasSize = NSMakeSize(pvr.width, pvr.height);
-#endif
-    CGContextRef cgContext = QLPreviewRequestCreateContext(preview, *(CGSize *)&canvasSize, false, NULL);
-    if (cgContext) {
-        NSGraphicsContext *context = [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:NO];
-
-        if (context) {
-            [NSGraphicsContext saveGraphicsState];
-            [NSGraphicsContext setCurrentContext:context];
-            [context saveGraphicsState];
-
-            unsigned int w = pvr.width;
-            unsigned  int h = pvr.height;
-            if (pvr.data) {
-                uint8_t *buffer = pvr.data;
-
-                CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer, (w * h * 4), NULL);
-
-                unsigned int bitsPerComponent = 8;
-                unsigned int bitsPerPixel = 32;
-                unsigned int bytesPerRow = 4 * w;
-                CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-                CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
-                CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
-                CGImageRef image = CGImageCreate(w,
-                                                 h,
-                                                 bitsPerComponent,
-                                                 bitsPerPixel,
-                                                 bytesPerRow,
-                                                 colorSpaceRef,
-                                                 bitmapInfo,
-                                                 provider,
-                                                 NULL,
-                                                 NO,
-                                                 renderingIntent);
-                if (pvr.should_flip == true) {
-                    CGContextTranslateCTM(cgContext, 0.0f, h);
-                    CGContextScaleCTM(cgContext, 1.0f, -1.0f);
-                }
-                CGContextDrawImage((CGContext *)[context graphicsPort], CGRectMake(0, 0, w - 1, h - 1), image);
-                if (pvr.should_flip == true) {
-                    CGContextScaleCTM(cgContext, 1.0f, -1.0f);
-                    CGContextTranslateCTM(cgContext, 0.0f, -h);
-                }
-
-                CGDataProviderRelease(provider);
-                CGColorSpaceRelease(colorSpaceRef);
-                CGImageRelease(image);
-            }
-
-#ifdef SHOW_INFO
-            CGContextSelectFont(cgContext, "Lucida Grande Bold", 10, kCGEncodingMacRoman);
-            CGContextSetTextDrawingMode(cgContext, kCGTextFill);
-            CGContextSetRGBFillColor(cgContext, 1.0, 1.0, 1.0, 1.0);
-            CGContextSetTextPosition(cgContext, w, h - 10.0);
-            char str[128];
-            snprintf(str, 128, "%i x %i", w, h);
-            CGContextShowText(cgContext, str, strlen(str));
-
-            CGContextSetTextPosition(cgContext, w, h - 22.0);
-            snprintf(str, 128, "%i bpp", pvr.bpp);
-            CGContextShowText(cgContext, str, strlen(str));
-
-            CGContextSetTextPosition(cgContext, w, h - 34.0);
-            snprintf(str, 128, "Format: %s", pvr.format);
-            CGContextShowText(cgContext, str, strlen(str));
-
-            CGContextSetTextPosition(cgContext, w, h - 46.0);
-            snprintf(str, 128, "Mipmaps: %i", pvr.numMips);
-            CGContextShowText(cgContext, str, strlen(str));
-
-            if (pvr.data == NULL) {
-                CGContextSetTextPosition(cgContext, w, h - 59.0);
-                snprintf(str, 128, "(unsupported)");
-                CGContextShowText(cgContext, str, strlen(str));
-            }
-#endif
-
-            [context restoreGraphicsState];
-            [NSGraphicsContext restoreGraphicsState];
+        int res = pvr.load(targetCFS.UTF8String);
+        if (res != PVR_LOAD_OKAY && res != PVR_LOAD_UNKNOWN_TYPE) {
+            return noErr;
         }
 
-        QLPreviewRequestFlushContext(preview, cgContext);
-        CFRelease(cgContext);
-    }
+        // create the render context
+#ifdef SHOW_INFO
+        NSSize canvasSize = NSMakeSize(pvr.width + 100, pvr.height);
+#else
+        NSSize canvasSize = NSMakeSize(pvr.width, pvr.height);
+#endif
+        CGContextRef cgContext = QLPreviewRequestCreateContext(preview, *(CGSize *)&canvasSize, false, NULL);
+        if (cgContext) {
+            NSGraphicsContext *context =
+                [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:NO];
 
-    return noErr;
+            if (context) {
+                [NSGraphicsContext saveGraphicsState];
+                [NSGraphicsContext setCurrentContext:context];
+                [context saveGraphicsState];
+
+                unsigned int w = pvr.width;
+                unsigned int h = pvr.height;
+                if (pvr.data) {
+                    uint8_t *buffer = pvr.data;
+
+                    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer, (w * h * 4), NULL);
+
+                    unsigned int bitsPerComponent = 8;
+                    unsigned int bitsPerPixel = 32;
+                    unsigned int bytesPerRow = 4 * w;
+                    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
+                    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
+                    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+                    CGImageRef image = CGImageCreate(w,
+                                                     h,
+                                                     bitsPerComponent,
+                                                     bitsPerPixel,
+                                                     bytesPerRow,
+                                                     colorSpaceRef,
+                                                     bitmapInfo,
+                                                     provider,
+                                                     NULL,
+                                                     NO,
+                                                     renderingIntent);
+                    if (pvr.should_flip == true) {
+                        CGContextTranslateCTM(cgContext, 0.0f, h);
+                        CGContextScaleCTM(cgContext, 1.0f, -1.0f);
+                    }
+                    CGContextDrawImage((CGContext *)[context graphicsPort], CGRectMake(0, 0, w - 1, h - 1), image);
+                    if (pvr.should_flip == true) {
+                        CGContextScaleCTM(cgContext, 1.0f, -1.0f);
+                        CGContextTranslateCTM(cgContext, 0.0f, -h);
+                    }
+
+                    CGDataProviderRelease(provider);
+                    CGColorSpaceRelease(colorSpaceRef);
+                    CGImageRelease(image);
+                }
+
+#ifdef SHOW_INFO
+                CGContextSelectFont(cgContext, "Lucida Grande Bold", 10, kCGEncodingMacRoman);
+                CGContextSetTextDrawingMode(cgContext, kCGTextFill);
+                CGContextSetRGBFillColor(cgContext, 1.0, 1.0, 1.0, 1.0);
+                CGContextSetTextPosition(cgContext, w, h - 10.0);
+                char str[128];
+                snprintf(str, 128, "%i x %i", w, h);
+                CGContextShowText(cgContext, str, strlen(str));
+
+                CGContextSetTextPosition(cgContext, w, h - 22.0);
+                snprintf(str, 128, "%i bpp", pvr.bpp);
+                CGContextShowText(cgContext, str, strlen(str));
+
+                CGContextSetTextPosition(cgContext, w, h - 34.0);
+                snprintf(str, 128, "Format: %s", pvr.format);
+                CGContextShowText(cgContext, str, strlen(str));
+
+                CGContextSetTextPosition(cgContext, w, h - 46.0);
+                snprintf(str, 128, "Mipmaps: %i", pvr.numMips);
+                CGContextShowText(cgContext, str, strlen(str));
+
+                if (pvr.data == NULL) {
+                    CGContextSetTextPosition(cgContext, w, h - 59.0);
+                    snprintf(str, 128, "(unsupported)");
+                    CGContextShowText(cgContext, str, strlen(str));
+                }
+#endif
+
+                [context restoreGraphicsState];
+                [NSGraphicsContext restoreGraphicsState];
+            }
+
+            QLPreviewRequestFlushContext(preview, cgContext);
+            CFRelease(cgContext);
+        }
+
+        return noErr;
     }
 }
 

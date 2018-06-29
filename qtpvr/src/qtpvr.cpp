@@ -34,10 +34,8 @@ static QImage::Format getFormatFromString(const char *inFormat) {
     return QImage::Format_Invalid;
 }
 
-qtpvr::qtpvr(QWidget *parent, const char *imagePath) :
-    QMainWindow(parent),
-    ui(new Ui::qtpvr),
-    scene(new QGraphicsScene(this)) {
+qtpvr::qtpvr(QWidget *parent, const char *imagePath)
+    : QMainWindow(parent), ui(new Ui::qtpvr), scene(new QGraphicsScene(this)) {
     ui->setupUi(this);
 
     PVRTexture pvr;

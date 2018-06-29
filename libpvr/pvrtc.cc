@@ -406,7 +406,6 @@ static void GetModulationValue(int x,
         else {
             // else it's V-Only
             ModVal = (RepVals0[ModulationVals[y - 1][x]] + RepVals0[ModulationVals[y + 1][x]] + 1) / 2;
-
         }
     }
 
@@ -474,7 +473,6 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_
         SrcBitPos <<= 1;
         DstBitPos <<= 2;
         ShiftCount += 1;
-
     }
 
     // prepend any unused bits
@@ -561,10 +559,14 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             BlkYp1 = limit_coord(BlkY + 1, BlkYDim, AssumeImageTiles);
 
             // Map to block memory locations
-            pBlocks[0][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkX);
-            pBlocks[0][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkXp1);
-            pBlocks[1][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkX);
-            pBlocks[1][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkXp1);
+            pBlocks[0][0] =
+                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkX);
+            pBlocks[0][1] =
+                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkXp1);
+            pBlocks[1][0] =
+                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkX);
+            pBlocks[1][1] =
+                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkXp1);
 
             // extract the colours and the modulation information IF the previous values have changed.
             if (memcmp(pPrevious, pBlocks, 4 * sizeof(void *)) != 0) {
@@ -620,7 +622,6 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             pResultImage[uPosition + 1] = (uint8_t)Result[1];
             pResultImage[uPosition + 2] = (uint8_t)Result[2];
             pResultImage[uPosition + 3] = (uint8_t)Result[3];
-
         }
     }
 }
