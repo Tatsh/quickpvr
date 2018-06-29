@@ -30,6 +30,7 @@
 #include <stdio.h>
 #include <stdlib.h>
 
+unsigned int countBits(unsigned int x);
 unsigned int countBits(unsigned int x) {
     x = x - ((x >> 1) & 0x55555555);
     x = (x & 0x33333333) + ((x >> 2) & 0x33333333);

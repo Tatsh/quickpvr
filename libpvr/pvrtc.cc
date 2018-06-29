@@ -66,19 +66,12 @@ static inline int limit_coord(int val, int size, bool assume_image_tiles) {
     return clamp(val, 0, size - 1);
 }
 
-/******************************************************************************
- * Function Name: util_number_is_power_2
- *
- * Inputs       : input - A number.
- * Outputs      : -
- * Returns      : TRUE if the number is an integer power of two, else FALSE.
- * Globals Used : -
- *
- * Description  : Check that a number is an integer power of two, i.e.
- *                1, 2, 4, 8, ... etc.
- *                Returns FALSE for zero.
- * Pre-condition: -
- *****************************************************************************/
+/**
+ * Check if a value is a power of 2.
+ * @param input Input value.
+ * @return \p 1 if the value is a power of 2, otherwise \p 0.
+ */
+int util_number_is_power_2(unsigned input);
 int util_number_is_power_2(unsigned input) {
     unsigned minus1;
 
@@ -290,9 +283,7 @@ static void InterpolateColours(const int ColourP[4],
 
     int P[4], Q[4], R[4], S[4];
 
-    /*
     // Copy the colours
-    */
     for (k = 0; k < 4; k++) {
         P[k] = ColourP[k];
         Q[k] = ColourQ[k];
@@ -300,9 +291,7 @@ static void InterpolateColours(const int ColourP[4],
         S[k] = ColourS[k];
     }
 
-    /*
     // put the x and y values into the right range
-    */
     v = (y & 0x3) | ((~y & 0x2) << 1);
     if (Do2bitMode) {
         u = (x & 0x7) | ((~x & 0x4) << 1);
@@ -333,59 +322,40 @@ static void InterpolateColours(const int ColourP[4],
         Result[k] = tmp1;
     }
 
-    /*
     // Lop off the appropriate number of bits to get us to 8 bit precision
-    */
     if (Do2bitMode) {
-        /*
         // do RGB
-        */
         for (k = 0; k < 3; k++) {
             Result[k] >>= 2;
         }
 
         Result[3] >>= 1;
     } else {
-        /*
         // do RGB  (A is ok)
-        */
         for (k = 0; k < 3; k++) {
             Result[k] >>= 1;
         }
     }
 
-    /*
     // sanity check
-    */
     for (k = 0; k < 4; k++) {
         _ASSERT(Result[k] < 256);
     }
 
-    /*
     // Convert from 5554 to 8888
-    //
     // do RGB 5.3 => 8
-    */
     for (k = 0; k < 3; k++) {
         Result[k] += Result[k] >> 5;
     }
     Result[3] += Result[3] >> 4;
 
-    /*
     // 2nd sanity check
-    */
     for (k = 0; k < 4; k++) {
         _ASSERT(Result[k] < 256);
     }
 }
 
-/***********************************************************/
-/*
-// GetModulationValue
-//
-// Get the modulation value as a numerator of a fraction of 8ths
-*/
-/***********************************************************/
+/// Get the modulation value as a numerator of a fraction of 8ths.
 static void GetModulationValue(int x,
                                int y,
                                const int Do2bitMode,
@@ -398,9 +368,7 @@ static void GetModulationValue(int x,
 
     int ModVal;
 
-    /*
     // Map X and Y into the local 2x2 block
-    */
     y = (y & 0x3) | ((~y & 0x2) << 1);
     if (Do2bitMode) {
         x = (x & 0x7) | ((~x & 0x4) << 1);
@@ -409,51 +377,41 @@ static void GetModulationValue(int x,
         x = (x & 0x3) | ((~x & 0x2) << 1);
     }
 
-    /*
     // assume no PT for now
-    */
     *DoPT = 0;
 
-    /*
     // extract the modulation value. If a simple encoding
-    */
     if (ModulationModes[y][x] == 0) {
         ModVal = RepVals0[ModulationVals[y][x]];
     } else if (Do2bitMode) {
-        /*
-        // if this is a stored value
-        */
+
         if (((x ^ y) & 1) == 0) {
+            // if this is a stored value
             ModVal = RepVals0[ModulationVals[y][x]];
         }
-        /*
-        // else average from the neighbours
-        //
-        // if H&V interpolation...
-        */
+
         else if (ModulationModes[y][x] == 1) {
+            // else average from the neighbours
+            // if H&V interpolation...
             ModVal = (RepVals0[ModulationVals[y - 1][x]] + RepVals0[ModulationVals[y + 1][x]] +
                       RepVals0[ModulationVals[y][x - 1]] + RepVals0[ModulationVals[y][x + 1]] + 2) /
                      4;
         }
-        /*
-        // else if H-Only
-        */
+
         else if (ModulationModes[y][x] == 2) {
+            // else if H-Only
             ModVal = (RepVals0[ModulationVals[y][x - 1]] + RepVals0[ModulationVals[y][x + 1]] + 1) / 2;
         }
-        /*
-        // else it's V-Only
-        */
+
         else {
+            // else it's V-Only
             ModVal = (RepVals0[ModulationVals[y - 1][x]] + RepVals0[ModulationVals[y + 1][x]] + 1) / 2;
 
-        } /*end if/then/else*/
+        }
     }
-    /*
-    // else it's 4BPP and PT encoding
-    */
+
     else {
+        // else it's 4BPP and PT encoding
         ModVal = RepVals1[ModulationVals[y][x]];
 
         *DoPT = ModulationVals[y][x] == PT_INDEX;
@@ -462,20 +420,12 @@ static void GetModulationValue(int x,
     *Mod = ModVal;
 }
 
-/*****************************************************************************/
-/*
-// TwiddleUV
-//
-// Given the Block (or pixel) coordinates and the dimension of the texture
-// in blocks (or pixels) this returns the twiddled offset of the block
-// (or pixel) from the start of the map.
-//
-// NOTE the dimensions of the texture must be a power of 2
-*/
-/*****************************************************************************/
-
 static int DisableTwiddlingRoutine = 0;
 
+/**
+ * Given the Block (or pixel) coordinates and the dimension of the texture in blocks (or pixels) this returns the
+ * twiddled offset of the block (or pixel) from the start of the map.
+ */
 static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_t XPos) {
     uint32_t Twiddled;
 
@@ -501,16 +451,12 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_
         MaxValue = YPos;
     }
 
-    /*
     // Nasty hack to disable twiddling
-    */
     if (DisableTwiddlingRoutine) {
         return (YPos * XSize + XPos);
     }
 
-    /*
     // Step through all the bits in the "minimum" dimension
-    */
     SrcBitPos = 1;
     DstBitPos = 1;
     Twiddled = 0;
@@ -529,11 +475,9 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_
         DstBitPos <<= 2;
         ShiftCount += 1;
 
-    } /*end while*/
+    }
 
-    /*
     // prepend any unused bits
-    */
     MaxValue >>= ShiftCount;
 
     Twiddled |= (MaxValue << (2 * ShiftCount));
@@ -541,15 +485,13 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_
     return Twiddled;
 }
 
-/***********************************************************/
-/*
-// Decompress
-//
-// Takes the compressed input data and outputs the equivalent decompressed
-// image.
-*/
-/***********************************************************/
-
+/// Takes the compressed input data and outputs the equivalent decompressed image.
+extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
+                       const int Do2bitMode,
+                       const int XDim,
+                       const int YDim,
+                       const int AssumeImageTiles,
+                       unsigned char *pResultImage);
 extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                        const int Do2bitMode,
                        const int XDim,
@@ -573,23 +515,16 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
 
     unsigned int uPosition;
 
-    /*
     // local neighbourhood of blocks
-    */
     AMTC_BLOCK_STRUCT *pBlocks[2][2];
-
     AMTC_BLOCK_STRUCT *pPrevious[2][2] = {{NULL, NULL}, {NULL, NULL}};
 
-    /*
     // Low precision colours extracted from the blocks
-    */
     struct {
         int Reps[2][4];
     } Colours5554[2][2];
 
-    /*
     // Interpolated A and B colours for the pixel
-    */
     int ASig[4], BSig[4];
 
     int Result[4];
@@ -600,22 +535,15 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
         XBlockSize = BLK_X_4BPP;
     }
 
-    /*
     // For MBX don't allow the sizes to get too small
-    */
     BlkXDim = max(2, XDim / XBlockSize);
     BlkYDim = max(2, YDim / BLK_Y_SIZE);
 
-    /*
     // Step through the pixels of the image decompressing each one in turn
-    //
     // Note that this is a hideously inefficient way to do this!
-    */
     for (y = 0; y < YDim; y++) {
         for (x = 0; x < XDim; x++) {
-            /*
             // map this pixel to the top left neighbourhood of blocks
-            */
             BlkX = (x - XBlockSize / 2);
             BlkY = (y - BLK_Y_SIZE / 2);
 
@@ -628,48 +556,34 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             // BlkX = LIMIT_COORD(BlkX, BlkXDim, AssumeImageTiles);
             // BlkY = LIMIT_COORD(BlkY, BlkYDim, AssumeImageTiles);
 
-            /*
             // compute the positions of the other 3 blocks
-            */
             BlkXp1 = limit_coord(BlkX + 1, BlkXDim, AssumeImageTiles);
             BlkYp1 = limit_coord(BlkY + 1, BlkYDim, AssumeImageTiles);
 
-            /*
             // Map to block memory locations
-            */
             pBlocks[0][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkX);
             pBlocks[0][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkXp1);
             pBlocks[1][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkX);
             pBlocks[1][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkXp1);
 
-            /*
-            // extract the colours and the modulation information IF the previous values
-            // have changed.
-            */
+            // extract the colours and the modulation information IF the previous values have changed.
             if (memcmp(pPrevious, pBlocks, 4 * sizeof(void *)) != 0) {
                 StartY = 0;
                 for (i = 0; i < 2; i++) {
                     StartX = 0;
                     for (j = 0; j < 2; j++) {
                         Unpack5554Colour(pBlocks[i][j], Colours5554[i][j].Reps);
-
                         UnpackModulations(pBlocks[i][j], Do2bitMode, ModulationVals, ModulationModes, StartX, StartY);
-
                         StartX += XBlockSize;
-                    } /*end for j*/
-
+                    }
                     StartY += BLK_Y_SIZE;
-                } /*end for i*/
+                }
 
-                /*
                 // make a copy of the new pointers
-                */
                 memcpy(pPrevious, pBlocks, 4 * sizeof(void *));
-            } /*end if the blocks have changed*/
+            }
 
-            /*
             // decompress the pixel.  First compute the interpolated A and B signals
-            */
             InterpolateColours(Colours5554[0][0].Reps[0],
                                Colours5554[0][1].Reps[0],
                                Colours5554[1][0].Reps[0],
@@ -691,9 +605,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             GetModulationValue(
                 x, y, Do2bitMode, (const int(*)[16])ModulationVals, (const int(*)[16])ModulationModes, &Mod, &DoPT);
 
-            /*
             // compute the modulated colour
-            */
             for (i = 0; i < 4; i++) {
                 Result[i] = ASig[i] * 8 + Mod * (BSig[i] - ASig[i]);
                 Result[i] >>= 3;
@@ -702,15 +614,13 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                 Result[3] = 0;
             }
 
-            /*
             // Store the result in the output image
-            */
             uPosition = (unsigned int)((x + y * XDim) << 2);
             pResultImage[uPosition + 0] = (uint8_t)Result[0];
             pResultImage[uPosition + 1] = (uint8_t)Result[1];
             pResultImage[uPosition + 2] = (uint8_t)Result[2];
             pResultImage[uPosition + 3] = (uint8_t)Result[3];
 
-        } /*end for x*/
-    }     /*end for y*/
+        }
+    }
 }
