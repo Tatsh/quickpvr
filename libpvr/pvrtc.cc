@@ -82,14 +82,7 @@ int util_number_is_power_2(unsigned input) {
     return ((input | minus1) == (input ^ minus1)) ? 1 : 0;
 }
 
-/***********************************************************/
-/*
-// Unpack5554Colour
-//
-// Given a block, extract the colour information and convert to 5554 formats
-*/
-/***********************************************************/
-
+/// Given a block, extract the colour information and convert to 5554 formats
 static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock, int ABColours[2][4]) {
     uint32_t RawBits[2];
 
@@ -128,56 +121,37 @@ static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock, int ABColours[2][4
             // set 4bit alpha fully on...
             */
             ABColours[i][3] = 0xF;
-        }
-        /*
-        // Else if colour has variable translucency
-        */
-        else {
-            /*
+        } else {
+            // Else if colour has variable translucency
             // Extract R and G (both 4 bit).
             // (Leave a space on the end for the replication of bits
-            */
             ABColours[i][0] = (RawBits[i] >> (8 - 1)) & 0x1E;
             ABColours[i][1] = (RawBits[i] >> (4 - 1)) & 0x1E;
 
-            /*
             // replicate bits to truly expand to 5 bits
-            */
             ABColours[i][0] |= ABColours[i][0] >> 4;
             ABColours[i][1] |= ABColours[i][1] >> 4;
 
-            /*
             // grab the 3(+padding) or 4 bits of blue and add an extra padding bit
-            */
             ABColours[i][2] = (int)((RawBits[i] & 0xF) << 1);
 
-            /*
-            // expand from 3 to 5 bits if this is from colour A, or 4 to 5 bits if from
-            // colour B
-            */
+            // expand from 3 to 5 bits if this is from colour A, or 4 to 5 bits if from colour B
             if (i == 0) {
                 ABColours[0][2] |= ABColours[0][2] >> 3;
             } else {
                 ABColours[0][2] |= ABColours[0][2] >> 4;
             }
 
-            /*
             // Set the alpha bits to be 3 + a zero on the end
-            */
             ABColours[i][3] = (RawBits[i] >> 11) & 0xE;
-        } /*end if variable alpha*/
-    }     /*end for i*/
+        } // end if variable alpha
+    }
 }
 
-/***********************************************************/
-/*
-// UnpackModulations
-//
-// Given the block and the texture type and it's relative position in the
-// 2x2 group of blocks, extract the bit patterns for the fully defined pixels.
-*/
-/***********************************************************/
-
+/**
+ * Given the block and the texture type and it's relative position in the
+ * 2x2 group of blocks, extract the bit patterns for the fully defined pixels.
+ */
 static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
                               const int Do2bitMode,
                               int ModulationVals[8][16],
@@ -192,39 +166,28 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
     BlockModMode = pBlock->PackedData[1] & 1;
     ModulationBits = pBlock->PackedData[0];
 
-    /*
     // if it's in an interpolated mode
-    */
     if (Do2bitMode && BlockModMode) {
-        /*
         // run through all the pixels in the block. Note we can now treat all the
         // "stored" values as if they have 2bits (even when they didn't!)
-        */
         for (y = 0; y < BLK_Y_SIZE; y++) {
             for (x = 0; x < BLK_X_2BPP; x++) {
                 ModulationModes[y + StartY][x + StartX] = BlockModMode;
 
-                /*
                 // if this is a stored value...
-                */
                 if (((x ^ y) & 1) == 0) {
                     ModulationVals[y + StartY][x + StartX] = ModulationBits & 3;
                     ModulationBits >>= 2;
                 }
             }
-        } /*end for y*/
-    }
-    /*
-    // else if direct encoded 2bit mode - i.e. 1 mode bit per pixel
-    */
-    else if (Do2bitMode) {
+        }
+    } else if (Do2bitMode) {
+        // else if direct encoded 2bit mode - i.e. 1 mode bit per pixel
         for (y = 0; y < BLK_Y_SIZE; y++) {
             for (x = 0; x < BLK_X_2BPP; x++) {
                 ModulationModes[y + StartY][x + StartX] = BlockModMode;
 
-                /*
                 // double the bits so 0=> 00, and 1=>11
-                */
                 if (ModulationBits & 1) {
                     ModulationVals[y + StartY][x + StartX] = 0x3;
                 } else {
@@ -232,12 +195,9 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
                 }
                 ModulationBits >>= 1;
             }
-        } /*end for y*/
-    }
-    /*
-    // else its the 4bpp mode so each value has 2 bits
-    */
-    else {
+        }
+    } else {
+        // else its the 4bpp mode so each value has 2 bits
         for (y = 0; y < BLK_Y_SIZE; y++) {
             for (x = 0; x < BLK_X_4BPP; x++) {
                 ModulationModes[y + StartY][x + StartX] = BlockModMode;
@@ -245,28 +205,18 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
                 ModulationVals[y + StartY][x + StartX] = ModulationBits & 3;
                 ModulationBits >>= 2;
             }
-        } /*end for y*/
+        }
     }
 
-    /*
     // make sure nothing is left over
-    */
     _ASSERT(ModulationBits == 0);
 }
 
-/***********************************************************/
-/*
-// Interpolate Colours
-//
-//
-// This performs a HW bit accurate interpolation of either the
-// A or B colours for a particular pixel
-//
-// NOTE: It is assumed that the source colours are in ARGB 5554 format -
-//		 This means that some "preparation" of the values will be necessary.
-*/
-/***********************************************************/
-
+/**
+ * This performs a HW bit accurate interpolation of either the A or B colours for a particular pixel.
+ * It is assumed that the source colours are in ARGB 5554 format. This means that some "preparation" of the
+ * values will be necessary.
+ */
 static void InterpolateColours(const int ColourP[4],
                                const int ColourQ[4],
                                const int ColourR[4],
@@ -300,9 +250,7 @@ static void InterpolateColours(const int ColourP[4],
         u = (x & 0x3) | ((~x & 0x2) << 1);
     }
 
-    /*
     // get the u and v scale amounts
-    */
     v = v - BLK_Y_SIZE / 2;
 
     if (Do2bitMode) {

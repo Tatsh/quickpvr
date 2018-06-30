@@ -399,9 +399,7 @@ ePVRLoadResult PVRTexture::load(const char *const path) {
     }
 }
 
-/*******************************************************************************
-  PVR 3 support
- ******************************************************************************/
+// PVR 3 support
 #pragma pack(push, 1)
 struct PVR3Header {
     uint32_t version;
