@@ -10,7 +10,8 @@
 		26221B3020E5887B004E3F3F /* pvrtc.cc in Sources */ = {isa = PBXBuildFile; fileRef = 26221B2D20E5887A004E3F3F /* pvrtc.cc */; };
 		26221B3220E5887B004E3F3F /* pvr.cc in Sources */ = {isa = PBXBuildFile; fileRef = 26221B2F20E5887B004E3F3F /* pvr.cc */; };
 		26221B3420E588B1004E3F3F /* pvr.h in Headers */ = {isa = PBXBuildFile; fileRef = 26221B2E20E5887B004E3F3F /* pvr.h */; settings = {ATTRIBUTES = (Public, ); }; };
-		26221B3620E5894C004E3F3F /* pvr.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26221B2720E58820004E3F3F /* pvr.dylib */; };
+		26221B3620E5894C004E3F3F /* libpvr.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26221B2720E58820004E3F3F /* libpvr.dylib */; };
+		26C893AD20E8317700B89058 /* libpvr.dylib in CopyFiles */ = {isa = PBXBuildFile; fileRef = 26221B2720E58820004E3F3F /* libpvr.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		2C05A19C06CAA52B00D84F6F /* GeneratePreviewForURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C05A19B06CAA52B00D84F6F /* GeneratePreviewForURL.m */; };
 		61E3BCFB0870B4F2002186A0 /* GenerateThumbnailForURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 61E3BCFA0870B4F2002186A0 /* GenerateThumbnailForURL.m */; };
 		8D576312048677EA00EA77CD /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB77B6FE84183AC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
@@ -34,6 +35,16 @@
 /* End PBXContainerItemProxy section */
 
 /* Begin PBXCopyFilesBuildPhase section */
+		26C893AC20E8316C00B89058 /* CopyFiles */ = {
+			isa = PBXCopyFilesBuildPhase;
+			buildActionMask = 12;
+			dstPath = "$(INSTALL_PATH)";
+			dstSubfolderSpec = 0;
+			files = (
+				26C893AD20E8317700B89058 /* libpvr.dylib in CopyFiles */,
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+		};
 		9FCFEAC21067B89600EC5BB5 /* CopyFiles */ = {
 			isa = PBXCopyFilesBuildPhase;
 			buildActionMask = 2147483647;
@@ -50,7 +61,7 @@
 		089C167EFE841241C02AAC07 /* English */ = {isa = PBXFileReference; fileEncoding = 10; lastKnownFileType = text.plist.strings; name = English; path = English.lproj/InfoPlist.strings; sourceTree = "<group>"; };
 		08FB77B6FE84183AC02AAC07 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
-		26221B2720E58820004E3F3F /* pvr.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = pvr.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
+		26221B2720E58820004E3F3F /* libpvr.dylib */ = {isa = PBXFileReference; explicitFileType = "compiled.mach-o.dylib"; includeInIndex = 0; path = libpvr.dylib; sourceTree = BUILT_PRODUCTS_DIR; };
 		26221B2D20E5887A004E3F3F /* pvrtc.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pvrtc.cc; sourceTree = "<group>"; };
 		26221B2E20E5887B004E3F3F /* pvr.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = pvr.h; sourceTree = "<group>"; };
 		26221B2F20E5887B004E3F3F /* pvr.cc */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.cpp.cpp; path = pvr.cc; sourceTree = "<group>"; };
@@ -76,7 +87,7 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				26221B3620E5894C004E3F3F /* pvr.dylib in Frameworks */,
+				26221B3620E5894C004E3F3F /* libpvr.dylib in Frameworks */,
 				8D576314048677EA00EA77CD /* CoreFoundation.framework in Frameworks */,
 				C86B05270671AA6E00DD9006 /* CoreServices.framework in Frameworks */,
 				F28CFBFD0A3EC0AF000ABFF5 /* ApplicationServices.framework in Frameworks */,
@@ -136,7 +147,7 @@
 			isa = PBXGroup;
 			children = (
 				8D576316048677EA00EA77CD /* quickpvr.qlgenerator */,
-				26221B2720E58820004E3F3F /* pvr.dylib */,
+				26221B2720E58820004E3F3F /* libpvr.dylib */,
 			);
 			name = Products;
 			sourceTree = "<group>";
@@ -179,21 +190,22 @@
 /* End PBXHeadersBuildPhase section */
 
 /* Begin PBXNativeTarget section */
-		26221B2620E58820004E3F3F /* pvr */ = {
+		26221B2620E58820004E3F3F /* libpvr */ = {
 			isa = PBXNativeTarget;
-			buildConfigurationList = 26221B2A20E58820004E3F3F /* Build configuration list for PBXNativeTarget "pvr" */;
+			buildConfigurationList = 26221B2A20E58820004E3F3F /* Build configuration list for PBXNativeTarget "libpvr" */;
 			buildPhases = (
 				26221B2320E58820004E3F3F /* Sources */,
 				26221B2420E58820004E3F3F /* Frameworks */,
 				26221B2520E58820004E3F3F /* Headers */,
+				26C893AC20E8316C00B89058 /* CopyFiles */,
 			);
 			buildRules = (
 			);
 			dependencies = (
 			);
-			name = pvr;
+			name = libpvr;
 			productName = libpvr;
-			productReference = 26221B2720E58820004E3F3F /* pvr.dylib */;
+			productReference = 26221B2720E58820004E3F3F /* libpvr.dylib */;
 			productType = "com.apple.product-type.library.dynamic";
 		};
 		8D57630D048677EA00EA77CD /* quickpvr */ = {
@@ -248,7 +260,7 @@
 			projectRoot = "";
 			targets = (
 				8D57630D048677EA00EA77CD /* quickpvr */,
-				26221B2620E58820004E3F3F /* pvr */,
+				26221B2620E58820004E3F3F /* libpvr */,
 			);
 		};
 /* End PBXProject section */
@@ -299,7 +311,7 @@
 /* Begin PBXTargetDependency section */
 		26221B2C20E58866004E3F3F /* PBXTargetDependency */ = {
 			isa = PBXTargetDependency;
-			target = 26221B2620E58820004E3F3F /* pvr */;
+			target = 26221B2620E58820004E3F3F /* libpvr */;
 			targetProxy = 26221B2B20E58866004E3F3F /* PBXContainerItemProxy */;
 		};
 /* End PBXTargetDependency section */
@@ -358,12 +370,12 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = dwarf;
 				DEVELOPMENT_TEAM = EU5R2QY9HJ;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				ENABLE_TESTABILITY = YES;
+				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_DYNAMIC_NO_PIC = NO;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
@@ -394,9 +406,9 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				INSTALL_PATH = $HOME/.local/lib;
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = pvr;
-				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Debug;
@@ -443,11 +455,11 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CODE_SIGN_IDENTITY = "Mac Developer";
-				COPY_PHASE_STRIP = NO;
 				DEAD_CODE_STRIPPING = YES;
 				DEBUG_INFORMATION_FORMAT = "dwarf-with-dsym";
 				DEVELOPMENT_TEAM = EU5R2QY9HJ;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
+				EXECUTABLE_PREFIX = lib;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
 				GCC_ENABLE_CPP_EXCEPTIONS = NO;
 				GCC_ENABLE_CPP_RTTI = NO;
@@ -475,9 +487,9 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				INSTALL_PATH = $HOME/.local/lib;
+				LD_DYLIB_INSTALL_NAME = "$(DYLIB_INSTALL_NAME_BASE:standardizepath)/$(EXECUTABLE_PATH)";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = pvr;
-				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -810,7 +822,7 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
-		26221B2A20E58820004E3F3F /* Build configuration list for PBXNativeTarget "pvr" */ = {
+		26221B2A20E58820004E3F3F /* Build configuration list for PBXNativeTarget "libpvr" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (
 				26221B2820E58820004E3F3F /* Debug */,
