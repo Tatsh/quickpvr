@@ -209,6 +209,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data2, int length) {
     printf("Height: %i\n", this->height);
 
     this->data = (uint8_t *)malloc(this->width * this->height * 4);
+    this->ptype = ptype;
+    this->flags = header->flags;
 
     if (ptype < PVR_MAX_TYPE)
         this->format = typeStrings[ptype];

@@ -74,6 +74,8 @@ struct EXPORT PVRTexture {
     unsigned int height;
     unsigned int numMips;
     unsigned int bpp;
+    unsigned int ptype;
+    unsigned int flags;
     const char *format;
     bool should_flip = true;
 
