@@ -58,9 +58,13 @@ qtpvr::qtpvr(QWidget *parent, const char *imagePath)
         }
 
         QImage image(pvr.data, pvr.width, pvr.height, format);
+        if (pvr.should_flip) {
+            image = image.mirrored();
+        }
 
         if (!image.isNull()) {
             QPixmap pixmap = QPixmap::fromImage(image);
+
             scene->addPixmap(pixmap);
             scene->setSceneRect(pixmap.rect());
             ui->graphicsView->setScene(scene);
