@@ -10,3 +10,4 @@ project.xcworkspace
 *.so*
 /qtpvr/build/
 *.dylib
+.vscode/
