@@ -1,4 +1,4 @@
-cmake_minimum_required(VERSION 2.8.11)
+cmake_minimum_required(VERSION 3.11.4)
 project(qtpvr)
 
 # Find includes in corresponding build directories
@@ -15,18 +15,24 @@ set(qtpvr_SRC
 )
 
 # Create code from a list of Qt designer ui files.
-#set(CMAKE_AUTOUIC ON) # use this if you have CMake 3.x instead of the following
-qt5_wrap_ui(qtpvr_SRC src/qtpvr.ui)
+set(CMAKE_AUTOUIC ON) # use this if you have CMake 3.x instead of the following
 
 # FIXME Remove this later. This is only for -lpvr/pvr.h
-include_directories(../libpvr)
-find_library(PVR_LIB NAMES pvr PATHS ../libpvr NO_DEFAULT_PATH)
+if(APPLE)
+    include_directories(../libpvr/build/pvr.framework/Headers)
+endif()
+set(CMAKE_INSTALL_RPATH_USE_LINK_PATH FALSE)
+set(CMAKE_INSTALL_RPATH "/Users/tatsh/dev/quickpvr/qtpvr/build")
+# find_library(PVR_LIB NAMES pvr PATHS ../libpvr NO_DEFAULT_PATH)
 
 # Tell CMake to create the helloworld executable
 add_executable(qtpvr ${qtpvr_SRC})
 
+if (APPLE)
+    target_link_libraries(qtpvr "-framework pvr -F../../libpvr/build")
+endif()
 # Use the Widgets module from Qt 5.
 target_link_libraries(qtpvr ${PVR_LIB} Qt5::Widgets)
 
 # Install the executable
-install(TARGETS qtpvr DESTINATION bin)
+# install(TARGETS qtpvr DESTINATION bin)
