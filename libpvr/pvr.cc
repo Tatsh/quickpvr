@@ -197,7 +197,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data2, int length) {
         return PVR_LOAD_INVALID_FILE;
     }
 
-    int ptype = header->flags & PVR_PIXELTYPE_MASK;
+    unsigned int localPtype = header->flags & PVR_PIXELTYPE_MASK;
     printf("Pixeltype: 0x%02x\n", ptype);
 
     this->width = header->width;
@@ -209,7 +209,7 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data2, int length) {
     printf("Height: %i\n", this->height);
 
     this->data = (uint8_t *)malloc(this->width * this->height * 4);
-    this->ptype = ptype;
+    this->ptype = localPtype;
     this->flags = header->flags;
 
     if (ptype < PVR_MAX_TYPE)
