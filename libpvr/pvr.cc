@@ -60,10 +60,13 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
     Thank you, Wolfgang!
  ******************************************************************************/
 
-const char *typeStrings[] = {"<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>",
-                             "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>",
-                             "<invalid>", "<invalid>", "RGBA4444",  "RGBA5551",  "RGBA8888",  "RGB565",    "RGB555",
-                             "RGB888",    "I8",        "AI8",       "PVRTC2",    "PVRTC4"};
+const char *typeStrings[] = {
+    "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>",
+    "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>",
+    "<invalid>", "<invalid>", "<invalid>", "<invalid>", "<invalid>",
+    "<invalid>", "RGBA4444",  "RGBA5551",  "RGBA8888",  "RGB565",
+    "RGB555",    "RGB888",    "I8",        "AI8",       "PVRTC2",
+    "PVRTC4"};
 
 typedef struct PVRHeader {
     uint32_t size;
@@ -146,7 +149,12 @@ bool PVRTexture::loadApplePVRTC(uint8_t *data2, int size) {
     this->numMips = 0;
     this->data = (uint8_t *)malloc(this->width * this->height * 4);
 
-    Decompress((AMTC_BLOCK_STRUCT *)data2, mode, (int)this->width, (int)this->height, 0, this->data);
+    Decompress((AMTC_BLOCK_STRUCT *)data2,
+               mode,
+               (int)this->width,
+               (int)this->height,
+               0,
+               this->data);
 
     for (int y = 0; y < res / 2; ++y)
         for (int x = 0; x < res; ++x) {
@@ -193,7 +201,8 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data2, int length) {
         return PVR_LOAD_MORE_THAN_ONE_SURFACE;
     }
 
-    if (header->width * header->height * header->bpp / 8 > ((unsigned long)length) - sizeof(PVRHeader)) {
+    if (header->width * header->height * header->bpp / 8 >
+        ((unsigned long)length) - sizeof(PVRHeader)) {
         return PVR_LOAD_INVALID_FILE;
     }
 
@@ -349,10 +358,20 @@ ePVRLoadResult PVRTexture::loadPVR2(uint8_t *data2, int length) {
             }
     } break;
     case PVR_TYPE_PVRTC2: {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 1, (int)this->width, (int)this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p,
+                   1,
+                   (int)this->width,
+                   (int)this->height,
+                   1,
+                   this->data);
     } break;
     case PVR_TYPE_PVRTC4: {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 0, (int)this->width, (int)this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p,
+                   0,
+                   (int)this->width,
+                   (int)this->height,
+                   1,
+                   this->data);
     } break;
     default:
         printf("unknown PVR type %i!\n", ptype);
@@ -469,9 +488,10 @@ struct FormatInfo {
     uint32_t bpp;
 };
 
-#define PVR3TAG(a, b, c, d, e, f, g, h)                                                                                \
-    ((static_cast<uint64_t>(a) << 56) | (static_cast<uint64_t>(b) << 48) | (static_cast<uint64_t>(c) << 40) |          \
-     (static_cast<uint64_t>(d) << 32) | (static_cast<uint64_t>(e) << 24) | (static_cast<uint64_t>(f) << 16) |          \
+#define PVR3TAG(a, b, c, d, e, f, g, h)                                       \
+    ((static_cast<uint64_t>(a) << 56) | (static_cast<uint64_t>(b) << 48) |    \
+     (static_cast<uint64_t>(c) << 40) | (static_cast<uint64_t>(d) << 32) |    \
+     (static_cast<uint64_t>(e) << 24) | (static_cast<uint64_t>(f) << 16) |    \
      (static_cast<uint64_t>(g) << 8) | (static_cast<uint64_t>(h) << 0))
 
 static const std::map<uint64_t, FormatInfo> kFormats({
@@ -511,17 +531,18 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data2, int length) {
         int f = header->format_chars[5];
         int g = header->format_chars[6];
         int h = header->format_chars[7];
-        printf("Unsupported PVR3 format: 0x%08x ('%c%c%c%c') 0x%08x (%i%i%i%i)\n",
-               header->format_split[0],
-               a,
-               b,
-               c,
-               d,
-               header->format_split[1],
-               e,
-               f,
-               g,
-               h);
+        printf(
+            "Unsupported PVR3 format: 0x%08x ('%c%c%c%c') 0x%08x (%i%i%i%i)\n",
+            header->format_split[0],
+            a,
+            b,
+            c,
+            d,
+            header->format_split[1],
+            e,
+            f,
+            g,
+            h);
         return PVR_LOAD_UNKNOWN_TYPE;
     }
     // Compute data size
@@ -629,19 +650,39 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data2, int length) {
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_2BPP_RGB): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 1, (int)this->width, (int)this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p,
+                   1,
+                   (int)this->width,
+                   (int)this->height,
+                   1,
+                   this->data);
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_4BPP_RGB): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 0, (int)this->width, (int)this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p,
+                   0,
+                   (int)this->width,
+                   (int)this->height,
+                   1,
+                   this->data);
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_2BPP_RGBA): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 1, (int)this->width, (int)this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p,
+                   1,
+                   (int)this->width,
+                   (int)this->height,
+                   1,
+                   this->data);
         break;
     }
     case PVR3TAG(0, 0, 0, 0, 0, 0, 0, kPVR3_PVRTC_4BPP_RGBA): {
-        Decompress((AMTC_BLOCK_STRUCT *)p, 0, (int)this->width, (int)this->height, 1, this->data);
+        Decompress((AMTC_BLOCK_STRUCT *)p,
+                   0,
+                   (int)this->width,
+                   (int)this->height,
+                   1,
+                   this->data);
         break;
     }
     default: {
@@ -654,17 +695,18 @@ ePVRLoadResult PVRTexture::loadPVR3(uint8_t *data2, int length) {
         int f = header->format_chars[5];
         int g = header->format_chars[6];
         int h = header->format_chars[7];
-        printf("Unsupported PVR3 format: 0x%08x ('%c%c%c%c') 0x%08x (%i%i%i%i)\n",
-               header->format_split[0],
-               a,
-               b,
-               c,
-               d,
-               header->format_split[1],
-               e,
-               f,
-               g,
-               h);
+        printf(
+            "Unsupported PVR3 format: 0x%08x ('%c%c%c%c') 0x%08x (%i%i%i%i)\n",
+            header->format_split[0],
+            a,
+            b,
+            c,
+            d,
+            header->format_split[1],
+            e,
+            f,
+            g,
+            h);
         return PVR_LOAD_UNKNOWN_TYPE;
     }
     }

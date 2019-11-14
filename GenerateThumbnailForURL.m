@@ -37,13 +37,16 @@ extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
                                             CFStringRef contentTypeUTI,
                                             CFDictionaryRef options,
                                             CGSize maxSize);
-extern "C" void CancelThumbnailGeneration(void *thisInterface, QLThumbnailRequestRef thumbnail);
+extern "C" void CancelThumbnailGeneration(void *thisInterface,
+                                          QLThumbnailRequestRef thumbnail);
 
 /* -----------------------------------------------------------------------------
     Generate a thumbnail for file
 
-   This function's job is to create thumbnail for designated file as fast as possible
-   ----------------------------------------------------------------------------- */
+   This function's job is to create thumbnail for designated file as fast as
+   possible
+   -----------------------------------------------------------------------------
+ */
 
 extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
                                             QLThumbnailRequestRef thumbnail,
@@ -68,10 +71,12 @@ extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
 
         // create the render context
         NSSize canvasSize = NSMakeSize(pvr.width, pvr.height);
-        CGContextRef cgContext = QLThumbnailRequestCreateContext(thumbnail, *(CGSize *)&canvasSize, false, NULL);
+        CGContextRef cgContext = QLThumbnailRequestCreateContext(
+            thumbnail, *(CGSize *)&canvasSize, false, NULL);
         if (cgContext) {
-            NSGraphicsContext *context =
-                [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:NO];
+            NSGraphicsContext *context = [NSGraphicsContext
+                graphicsContextWithGraphicsPort:(void *)cgContext
+                                        flipped:NO];
 
             if (context) {
                 [NSGraphicsContext saveGraphicsState];
@@ -83,14 +88,18 @@ extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
                 if (pvr.data) {
                     uint8_t *buffer = pvr.data;
 
-                    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer, (w * h * 4), NULL);
+                    CGDataProviderRef provider = CGDataProviderCreateWithData(
+                        NULL, buffer, (w * h * 4), NULL);
 
                     unsigned int bitsPerComponent = 8;
                     unsigned int bitsPerPixel = 32;
                     unsigned int bytesPerRow = 4 * w;
-                    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-                    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
-                    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+                    CGColorSpaceRef colorSpaceRef =
+                        CGColorSpaceCreateDeviceRGB();
+                    CGBitmapInfo bitmapInfo =
+                        kCGBitmapByteOrderDefault | kCGImageAlphaLast;
+                    CGColorRenderingIntent renderingIntent =
+                        kCGRenderingIntentDefault;
                     CGImageRef image = CGImageCreate(w,
                                                      h,
                                                      bitsPerComponent,
@@ -106,7 +115,9 @@ extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
                         CGContextTranslateCTM(cgContext, 0.0f, h);
                         CGContextScaleCTM(cgContext, 1.0f, -1.0f);
                     }
-                    CGContextDrawImage((CGContext *)[context graphicsPort], CGRectMake(0, 0, w - 1, h - 1), image);
+                    CGContextDrawImage((CGContext *)[context graphicsPort],
+                                       CGRectMake(0, 0, w - 1, h - 1),
+                                       image);
                     if (pvr.should_flip == true) {
                         CGContextScaleCTM(cgContext, 1.0f, -1.0f);
                         CGContextTranslateCTM(cgContext, 0.0f, -h);
@@ -128,7 +139,8 @@ extern "C" OSStatus GenerateThumbnailForURL(void *thisInterface,
     }
 }
 
-extern "C" void CancelThumbnailGeneration(void *thisInterface, QLThumbnailRequestRef thumbnail) {
+extern "C" void CancelThumbnailGeneration(void *thisInterface,
+                                          QLThumbnailRequestRef thumbnail) {
     // implement only if supported
     (void)thisInterface;
     (void)thumbnail;

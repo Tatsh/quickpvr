@@ -36,13 +36,15 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
                                           CFURLRef url,
                                           CFStringRef contentTypeUTI,
                                           CFDictionaryRef options);
-extern "C" void CancelPreviewGeneration(void *thisInterface, QLPreviewRequestRef preview);
+extern "C" void CancelPreviewGeneration(void *thisInterface,
+                                        QLPreviewRequestRef preview);
 
 /* -----------------------------------------------------------------------------
    Generate a preview for file
 
    This function's job is to create preview for designated file
-   ----------------------------------------------------------------------------- */
+   -----------------------------------------------------------------------------
+ */
 
 // uncomment this to show some image info as well
 //#define SHOW_INFO
@@ -72,10 +74,12 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
 #else
         NSSize canvasSize = NSMakeSize(pvr.width, pvr.height);
 #endif
-        CGContextRef cgContext = QLPreviewRequestCreateContext(preview, *(CGSize *)&canvasSize, false, NULL);
+        CGContextRef cgContext = QLPreviewRequestCreateContext(
+            preview, *(CGSize *)&canvasSize, false, NULL);
         if (cgContext) {
-            NSGraphicsContext *context =
-                [NSGraphicsContext graphicsContextWithGraphicsPort:(void *)cgContext flipped:NO];
+            NSGraphicsContext *context = [NSGraphicsContext
+                graphicsContextWithGraphicsPort:(void *)cgContext
+                                        flipped:NO];
 
             if (context) {
                 [NSGraphicsContext saveGraphicsState];
@@ -87,14 +91,18 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
                 if (pvr.data) {
                     uint8_t *buffer = pvr.data;
 
-                    CGDataProviderRef provider = CGDataProviderCreateWithData(NULL, buffer, (w * h * 4), NULL);
+                    CGDataProviderRef provider = CGDataProviderCreateWithData(
+                        NULL, buffer, (w * h * 4), NULL);
 
                     unsigned int bitsPerComponent = 8;
                     unsigned int bitsPerPixel = 32;
                     unsigned int bytesPerRow = 4 * w;
-                    CGColorSpaceRef colorSpaceRef = CGColorSpaceCreateDeviceRGB();
-                    CGBitmapInfo bitmapInfo = kCGBitmapByteOrderDefault | kCGImageAlphaLast;
-                    CGColorRenderingIntent renderingIntent = kCGRenderingIntentDefault;
+                    CGColorSpaceRef colorSpaceRef =
+                        CGColorSpaceCreateDeviceRGB();
+                    CGBitmapInfo bitmapInfo =
+                        kCGBitmapByteOrderDefault | kCGImageAlphaLast;
+                    CGColorRenderingIntent renderingIntent =
+                        kCGRenderingIntentDefault;
                     CGImageRef image = CGImageCreate(w,
                                                      h,
                                                      bitsPerComponent,
@@ -110,7 +118,9 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
                         CGContextTranslateCTM(cgContext, 0.0f, h);
                         CGContextScaleCTM(cgContext, 1.0f, -1.0f);
                     }
-                    CGContextDrawImage((CGContext *)[context graphicsPort], CGRectMake(0, 0, w - 1, h - 1), image);
+                    CGContextDrawImage((CGContext *)[context graphicsPort],
+                                       CGRectMake(0, 0, w - 1, h - 1),
+                                       image);
                     if (pvr.should_flip == true) {
                         CGContextScaleCTM(cgContext, 1.0f, -1.0f);
                         CGContextTranslateCTM(cgContext, 0.0f, -h);
@@ -122,7 +132,8 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
                 }
 
 #ifdef SHOW_INFO
-                CGContextSelectFont(cgContext, "Lucida Grande Bold", 10, kCGEncodingMacRoman);
+                CGContextSelectFont(
+                    cgContext, "Lucida Grande Bold", 10, kCGEncodingMacRoman);
                 CGContextSetTextDrawingMode(cgContext, kCGTextFill);
                 CGContextSetRGBFillColor(cgContext, 1.0, 1.0, 1.0, 1.0);
                 CGContextSetTextPosition(cgContext, w, h - 10.0);
@@ -161,7 +172,8 @@ extern "C" OSStatus GeneratePreviewForURL(void *thisInterface,
     }
 }
 
-extern "C" void CancelPreviewGeneration(void *thisInterface, QLPreviewRequestRef preview) {
+extern "C" void CancelPreviewGeneration(void *thisInterface,
+                                        QLPreviewRequestRef preview) {
     // implement only if supported
     (void)thisInterface;
     (void)preview;

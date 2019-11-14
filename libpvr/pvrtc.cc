@@ -3,13 +3,14 @@
    modified.
 
     Oolong Engine for the iPhone / iPod touch
-    Copyright (c) 2007-2008 Wolfgang Engel  http://code.google.com/p/oolongengine/
+    Copyright (c) 2007-2008 Wolfgang Engel
+   http://code.google.com/p/oolongengine/
 
     This software is provided 'as-is', without any express or implied warranty.
-    In no event will the authors be held liable for any damages arising from the use of this software.
-    Permission is granted to anyone to use this software for any purpose,
-    including commercial applications, and to alter it and redistribute it freely,
-    subject to the following restrictions:
+    In no event will the authors be held liable for any damages arising from
+   the use of this software. Permission is granted to anyone to use this
+   software for any purpose, including commercial applications, and to alter it
+   and redistribute it freely, subject to the following restrictions:
 
     1. The origin of this software must not be misrepresented; you must not
         claim that you wrote the original software. If you use this software in
@@ -83,7 +84,8 @@ int util_number_is_power_2(unsigned input) {
 }
 
 /// Given a block, extract the colour information and convert to 5554 formats
-static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock, int ABColours[2][4]) {
+static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock,
+                             int ABColours[2][4]) {
     uint32_t RawBits[2];
 
     int i;
@@ -91,8 +93,9 @@ static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock, int ABColours[2][4
     /*
     // Extract A and B
     */
-    RawBits[0] = pBlock->PackedData[1] & (0xFFFE); /*15 bits (shifted up by one)*/
-    RawBits[1] = pBlock->PackedData[1] >> 16;      /*16 bits*/
+    RawBits[0] =
+        pBlock->PackedData[1] & (0xFFFE);     /*15 bits (shifted up by one)*/
+    RawBits[1] = pBlock->PackedData[1] >> 16; /*16 bits*/
 
     /*
     //step through both colours
@@ -132,10 +135,12 @@ static void Unpack5554Colour(const AMTC_BLOCK_STRUCT *pBlock, int ABColours[2][4
             ABColours[i][0] |= ABColours[i][0] >> 4;
             ABColours[i][1] |= ABColours[i][1] >> 4;
 
-            // grab the 3(+padding) or 4 bits of blue and add an extra padding bit
+            // grab the 3(+padding) or 4 bits of blue and add an extra padding
+            // bit
             ABColours[i][2] = (int)((RawBits[i] & 0xF) << 1);
 
-            // expand from 3 to 5 bits if this is from colour A, or 4 to 5 bits if from colour B
+            // expand from 3 to 5 bits if this is from colour A, or 4 to 5 bits
+            // if from colour B
             if (i == 0) {
                 ABColours[0][2] |= ABColours[0][2] >> 3;
             } else {
@@ -168,15 +173,16 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
 
     // if it's in an interpolated mode
     if (Do2bitMode && BlockModMode) {
-        // run through all the pixels in the block. Note we can now treat all the
-        // "stored" values as if they have 2bits (even when they didn't!)
+        // run through all the pixels in the block. Note we can now treat all
+        // the "stored" values as if they have 2bits (even when they didn't!)
         for (y = 0; y < BLK_Y_SIZE; y++) {
             for (x = 0; x < BLK_X_2BPP; x++) {
                 ModulationModes[y + StartY][x + StartX] = BlockModMode;
 
                 // if this is a stored value...
                 if (((x ^ y) & 1) == 0) {
-                    ModulationVals[y + StartY][x + StartX] = ModulationBits & 3;
+                    ModulationVals[y + StartY][x + StartX] =
+                        ModulationBits & 3;
                     ModulationBits >>= 2;
                 }
             }
@@ -213,9 +219,10 @@ static void UnpackModulations(const AMTC_BLOCK_STRUCT *pBlock,
 }
 
 /**
- * This performs a HW bit accurate interpolation of either the A or B colours for a particular pixel.
- * It is assumed that the source colours are in ARGB 5554 format. This means that some "preparation" of the
- * values will be necessary.
+ * This performs a HW bit accurate interpolation of either the A or B colours
+ * for a particular pixel. It is assumed that the source colours are in ARGB
+ * 5554 format. This means that some "preparation" of the values will be
+ * necessary.
  */
 static void InterpolateColours(const int ColourP[4],
                                const int ColourQ[4],
@@ -341,19 +348,25 @@ static void GetModulationValue(int x,
         else if (ModulationModes[y][x] == 1) {
             // else average from the neighbours
             // if H&V interpolation...
-            ModVal = (RepVals0[ModulationVals[y - 1][x]] + RepVals0[ModulationVals[y + 1][x]] +
-                      RepVals0[ModulationVals[y][x - 1]] + RepVals0[ModulationVals[y][x + 1]] + 2) /
+            ModVal = (RepVals0[ModulationVals[y - 1][x]] +
+                      RepVals0[ModulationVals[y + 1][x]] +
+                      RepVals0[ModulationVals[y][x - 1]] +
+                      RepVals0[ModulationVals[y][x + 1]] + 2) /
                      4;
         }
 
         else if (ModulationModes[y][x] == 2) {
             // else if H-Only
-            ModVal = (RepVals0[ModulationVals[y][x - 1]] + RepVals0[ModulationVals[y][x + 1]] + 1) / 2;
+            ModVal = (RepVals0[ModulationVals[y][x - 1]] +
+                      RepVals0[ModulationVals[y][x + 1]] + 1) /
+                     2;
         }
 
         else {
             // else it's V-Only
-            ModVal = (RepVals0[ModulationVals[y - 1][x]] + RepVals0[ModulationVals[y + 1][x]] + 1) / 2;
+            ModVal = (RepVals0[ModulationVals[y - 1][x]] +
+                      RepVals0[ModulationVals[y + 1][x]] + 1) /
+                     2;
         }
     }
 
@@ -370,10 +383,12 @@ static void GetModulationValue(int x,
 static int DisableTwiddlingRoutine = 0;
 
 /**
- * Given the Block (or pixel) coordinates and the dimension of the texture in blocks (or pixels) this returns the
- * twiddled offset of the block (or pixel) from the start of the map.
+ * Given the Block (or pixel) coordinates and the dimension of the texture in
+ * blocks (or pixels) this returns the twiddled offset of the block (or pixel)
+ * from the start of the map.
  */
-static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_t XPos) {
+static uint32_t
+TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_t XPos) {
     uint32_t Twiddled;
 
     uint32_t MinDimension;
@@ -431,7 +446,8 @@ static uint32_t TwiddleUV(uint32_t YSize, uint32_t XSize, uint32_t YPos, uint32_
     return Twiddled;
 }
 
-/// Takes the compressed input data and outputs the equivalent decompressed image.
+/// Takes the compressed input data and outputs the equivalent decompressed
+/// image.
 extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                        const int Do2bitMode,
                        const int XDim,
@@ -507,24 +523,39 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             BlkYp1 = limit_coord(BlkY + 1, BlkYDim, AssumeImageTiles);
 
             // Map to block memory locations
-            pBlocks[0][0] =
-                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkX);
-            pBlocks[0][1] =
-                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkY, (uint32_t)BlkXp1);
-            pBlocks[1][0] =
-                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkX);
-            pBlocks[1][1] =
-                pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkXp1);
+            pBlocks[0][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim,
+                                                        (uint32_t)BlkXDim,
+                                                        (uint32_t)BlkY,
+                                                        (uint32_t)BlkX);
+            pBlocks[0][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim,
+                                                        (uint32_t)BlkXDim,
+                                                        (uint32_t)BlkY,
+                                                        (uint32_t)BlkXp1);
+            pBlocks[1][0] = pCompressedData + TwiddleUV((uint32_t)BlkYDim,
+                                                        (uint32_t)BlkXDim,
+                                                        (uint32_t)BlkYp1,
+                                                        (uint32_t)BlkX);
+            pBlocks[1][1] = pCompressedData + TwiddleUV((uint32_t)BlkYDim,
+                                                        (uint32_t)BlkXDim,
+                                                        (uint32_t)BlkYp1,
+                                                        (uint32_t)BlkXp1);
 
-            // extract the colours and the modulation information IF the previous values have changed.
+            // extract the colours and the modulation information IF the
+            // previous values have changed.
             bool hasModulationVals = false;
             if (memcmp(pPrevious, pBlocks, 4 * sizeof(void *)) != 0) {
                 StartY = 0;
                 for (i = 0; i < 2; i++) {
                     StartX = 0;
                     for (j = 0; j < 2; j++) {
-                        Unpack5554Colour(pBlocks[i][j], Colours5554[i][j].Reps);
-                        UnpackModulations(pBlocks[i][j], Do2bitMode, ModulationVals, ModulationModes, StartX, StartY);
+                        Unpack5554Colour(pBlocks[i][j],
+                                         Colours5554[i][j].Reps);
+                        UnpackModulations(pBlocks[i][j],
+                                          Do2bitMode,
+                                          ModulationVals,
+                                          ModulationModes,
+                                          StartX,
+                                          StartY);
                         hasModulationVals = true;
                         StartX += XBlockSize;
                     }
@@ -536,7 +567,8 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
             }
             _ASSERT(hasModulationVals == true);
 
-            // decompress the pixel.  First compute the interpolated A and B signals
+            // decompress the pixel.  First compute the interpolated A and B
+            // signals
             InterpolateColours(Colours5554[0][0].Reps[0],
                                Colours5554[0][1].Reps[0],
                                Colours5554[1][0].Reps[0],
@@ -555,8 +587,13 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                                y,
                                BSig);
 
-            GetModulationValue(
-                x, y, Do2bitMode, (const int(*)[16])ModulationVals, (const int(*)[16])ModulationModes, &Mod, &DoPT);
+            GetModulationValue(x,
+                               y,
+                               Do2bitMode,
+                               (const int(*)[16])ModulationVals,
+                               (const int(*)[16])ModulationModes,
+                               &Mod,
+                               &DoPT);
 
             // compute the modulated colour
             for (i = 0; i < 4; i++) {
