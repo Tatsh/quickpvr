@@ -64,7 +64,6 @@ qtpvr::qtpvr(QWidget *parent, const char *imagePath)
 
         if (!image.isNull()) {
             QPixmap pixmap = QPixmap::fromImage(image);
-
             scene->addPixmap(pixmap);
             scene->setSceneRect(pixmap.rect());
             ui->graphicsView->setScene(scene);
