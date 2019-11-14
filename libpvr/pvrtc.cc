@@ -517,6 +517,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                 pCompressedData + TwiddleUV((uint32_t)BlkYDim, (uint32_t)BlkXDim, (uint32_t)BlkYp1, (uint32_t)BlkXp1);
 
             // extract the colours and the modulation information IF the previous values have changed.
+            bool hasModulationVals = false;
             if (memcmp(pPrevious, pBlocks, 4 * sizeof(void *)) != 0) {
                 StartY = 0;
                 for (i = 0; i < 2; i++) {
@@ -524,6 +525,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                     for (j = 0; j < 2; j++) {
                         Unpack5554Colour(pBlocks[i][j], Colours5554[i][j].Reps);
                         UnpackModulations(pBlocks[i][j], Do2bitMode, ModulationVals, ModulationModes, StartX, StartY);
+                        hasModulationVals = true;
                         StartX += XBlockSize;
                     }
                     StartY += BLK_Y_SIZE;
@@ -532,6 +534,7 @@ extern void Decompress(AMTC_BLOCK_STRUCT *pCompressedData,
                 // make a copy of the new pointers
                 memcpy(pPrevious, pBlocks, 4 * sizeof(void *));
             }
+            _ASSERT(hasModulationVals == true);
 
             // decompress the pixel.  First compute the interpolated A and B signals
             InterpolateColours(Colours5554[0][0].Reps[0],
