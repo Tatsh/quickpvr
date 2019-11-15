@@ -10,7 +10,6 @@
 		26221B3020E5887B004E3F3F /* pvrtc.cc in Sources */ = {isa = PBXBuildFile; fileRef = 26221B2D20E5887A004E3F3F /* pvrtc.cc */; };
 		26221B3220E5887B004E3F3F /* pvr.cc in Sources */ = {isa = PBXBuildFile; fileRef = 26221B2F20E5887B004E3F3F /* pvr.cc */; };
 		26221B3620E5894C004E3F3F /* libpvr.dylib in Frameworks */ = {isa = PBXBuildFile; fileRef = 26221B2720E58820004E3F3F /* libpvr.dylib */; };
-		26684AE3237D2769009819CC /* libpvr.dylib in Embed Libraries */ = {isa = PBXBuildFile; fileRef = 26221B2720E58820004E3F3F /* libpvr.dylib */; settings = {ATTRIBUTES = (CodeSignOnCopy, ); }; };
 		2C05A19C06CAA52B00D84F6F /* GeneratePreviewForURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 2C05A19B06CAA52B00D84F6F /* GeneratePreviewForURL.m */; };
 		61E3BCFB0870B4F2002186A0 /* GenerateThumbnailForURL.m in Sources */ = {isa = PBXBuildFile; fileRef = 61E3BCFA0870B4F2002186A0 /* GenerateThumbnailForURL.m */; };
 		8D576312048677EA00EA77CD /* main.c in Sources */ = {isa = PBXBuildFile; fileRef = 08FB77B6FE84183AC02AAC07 /* main.c */; settings = {ATTRIBUTES = (); }; };
@@ -32,20 +31,6 @@
 		};
 /* End PBXContainerItemProxy section */
 
-/* Begin PBXCopyFilesBuildPhase section */
-		26684AE4237D2769009819CC /* Embed Libraries */ = {
-			isa = PBXCopyFilesBuildPhase;
-			buildActionMask = 2147483647;
-			dstPath = "";
-			dstSubfolderSpec = 10;
-			files = (
-				26684AE3237D2769009819CC /* libpvr.dylib in Embed Libraries */,
-			);
-			name = "Embed Libraries";
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXCopyFilesBuildPhase section */
-
 /* Begin PBXFileReference section */
 		08FB77B6FE84183AC02AAC07 /* main.c */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.c; path = main.c; sourceTree = "<group>"; };
 		0AA1909FFE8422F4C02AAC07 /* CoreFoundation.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = CoreFoundation.framework; path = /System/Library/Frameworks/CoreFoundation.framework; sourceTree = "<absolute>"; };
@@ -65,13 +50,6 @@
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
-		26221B2420E58820004E3F3F /* Frameworks */ = {
-			isa = PBXFrameworksBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
 		8D576313048677EA00EA77CD /* Frameworks */ = {
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
@@ -168,7 +146,6 @@
 			buildConfigurationList = 26221B2A20E58820004E3F3F /* Build configuration list for PBXNativeTarget "libpvr" */;
 			buildPhases = (
 				26221B2320E58820004E3F3F /* Sources */,
-				26221B2420E58820004E3F3F /* Frameworks */,
 			);
 			buildRules = (
 			);
@@ -187,8 +164,6 @@
 				8D57630F048677EA00EA77CD /* Resources */,
 				8D576311048677EA00EA77CD /* Sources */,
 				8D576313048677EA00EA77CD /* Frameworks */,
-				8D576315048677EA00EA77CD /* Rez */,
-				26684AE4237D2769009819CC /* Embed Libraries */,
 			);
 			buildRules = (
 			);
@@ -247,16 +222,6 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
-
-/* Begin PBXRezBuildPhase section */
-		8D576315048677EA00EA77CD /* Rez */ = {
-			isa = PBXRezBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-		};
-/* End PBXRezBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		26221B2320E58820004E3F3F /* Sources */ = {
@@ -377,9 +342,9 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
+				INSTALL_PATH = "$(HOME)/Library/QuickLook/quickpvr.qlgenerator/Contents/MacOS";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = pvr;
-				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Debug;
@@ -457,9 +422,9 @@
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
+				INSTALL_PATH = "$(HOME)/Library/QuickLook/quickpvr.qlgenerator/Contents/MacOS";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_NAME = pvr;
-				SKIP_INSTALL = YES;
 				VALIDATE_PRODUCT = YES;
 			};
 			name = Release;
@@ -505,7 +470,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES_AGGRESSIVE;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
-				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_CW_ASM_SYNTAX = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -537,7 +501,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "${HOME}/Library/QuickLook";
+				INSTALL_PATH = "$(HOME)/Library/QuickLook";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.limbicsoft.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = quickpvr;
@@ -586,7 +550,6 @@
 				CLANG_WARN_UNREACHABLE_CODE = YES_AGGRESSIVE;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				CLANG_WARN__EXIT_TIME_DESTRUCTORS = YES;
-				COPY_PHASE_STRIP = NO;
 				ENABLE_STRICT_OBJC_MSGSEND = YES;
 				GCC_CW_ASM_SYNTAX = NO;
 				GCC_C_LANGUAGE_STANDARD = gnu11;
@@ -618,7 +581,7 @@
 				GCC_WARN_UNUSED_LABEL = YES;
 				GCC_WARN_UNUSED_PARAMETER = YES;
 				INFOPLIST_FILE = Info.plist;
-				INSTALL_PATH = "${HOME}/Library/QuickLook";
+				INSTALL_PATH = "$(HOME)/Library/QuickLook";
 				MACOSX_DEPLOYMENT_TARGET = 10.7;
 				PRODUCT_BUNDLE_IDENTIFIER = "com.limbicsoft.${PRODUCT_NAME:identifier}";
 				PRODUCT_NAME = quickpvr;
