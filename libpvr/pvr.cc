@@ -402,13 +402,7 @@ ePVRLoadResult PVRTexture::load(const char *const path) {
     fclose(fp);
 
     // use a heuristic to detect potential apple PVRTC formats
-    unsigned int count;
-    if (__has_builtin(__builtin_popcount)) {
-        count = (unsigned int)__builtin_popcount(length);
-    } else {
-        count = countBits(length);
-    }
-    if (count == 1) {
+    if (countBits(length) == 1) {
         // very likely to be apple PVRTC
         if (loadApplePVRTC(data2, (int)length))
             return PVR_LOAD_OKAY;
