@@ -2,8 +2,8 @@ concurrency:
   cancel-in-progress: true
   group: '${{ github.workflow }}-${{ github.event.pull_request.number || github.sha }}'
 jobs:
-  analyze:
-    name: 'Analyze'
+  actions:
+    name: 'Actions'
     permissions:
       actions: 'read'
       contents: 'read'
@@ -18,31 +18,109 @@ jobs:
         uses: 'github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934'
         with:
           build-mode: 'none'
-          languages: '${{ matrix.language }}'
+          languages: 'actions'
       - name: 'Perform CodeQL Analysis'
         uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
         with:
-          category: '/language:${{matrix.language}}'
-    strategy:
-      fail-fast: false
-      matrix:
-        language:
-          - 'c-cpp'
-          - 'actions'
+          category: '/language:actions'
+  linux:
+    name: 'C/C++ (Linux)'
+    permissions:
+      actions: 'read'
+      contents: 'read'
+      security-events: 'write'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - name: 'Checkout repository'
+        uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - name: 'Install dependencies'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev libkf6kio-dev \
+            ninja-build qt6-base-dev
+      - name: 'Initialize CodeQL'
+        uses: 'github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          build-mode: 'manual'
+          languages: 'c-cpp'
+      - name: 'Build'
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+      - name: 'Perform CodeQL Analysis'
+        uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          category: '/language:c-cpp/os:linux'
+  macos:
+    name: 'C/C++ (macOS)'
+    permissions:
+      actions: 'read'
+      contents: 'read'
+      security-events: 'write'
+    runs-on: 'macos-15'
+    steps:
+      - name: 'Checkout repository'
+        uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - name: 'Install dependencies'
+        run: 'brew install ninja spdlog'
+      - name: 'Initialize CodeQL'
+        uses: 'github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          build-mode: 'manual'
+          languages: 'c-cpp'
+      - name: 'Build'
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build
+      - name: 'Perform CodeQL Analysis'
+        uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          category: '/language:c-cpp/os:macos'
+  windows:
+    name: 'C/C++ (Windows)'
+    permissions:
+      actions: 'read'
+      contents: 'read'
+      security-events: 'write'
+    runs-on: 'windows-latest'
+    steps:
+      - name: 'Checkout repository'
+        uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - name: 'Initialize CodeQL'
+        uses: 'github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          build-mode: 'manual'
+          languages: 'c-cpp'
+      - name: 'Build'
+        run: |
+          cmake -S . -B build -DCMAKE_BUILD_TYPE=Debug
+          cmake --build build --config Debug
+      - name: 'Perform CodeQL Analysis'
+        uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          category: '/language:c-cpp/os:windows'
 name: 'CodeQL'
 'on':
   pull_request:
     branches:
       - 'master'
     paths:
-      - '**/*.cpp'
-      - '**/*.cxx'
-      - '**/*.hpp'
-      - '**/*.hh'
-      - '**/*.hxx'
       - '**/*.c'
       - '**/*.cc'
+      - '**/*.cpp'
+      - '**/*.cxx'
       - '**/*.h'
+      - '**/*.hh'
+      - '**/*.hpp'
+      - '**/*.hxx'
+      - '**/*.mm'
+      - '**/CMakeLists.txt'
       - '.github/workflows/*.yml'
       - '.github/workflows/*.yaml'
       - '**/action.yml'
@@ -51,14 +129,16 @@ name: 'CodeQL'
     branches:
       - 'master'
     paths:
-      - '**/*.cpp'
-      - '**/*.cxx'
-      - '**/*.hpp'
-      - '**/*.hh'
-      - '**/*.hxx'
       - '**/*.c'
       - '**/*.cc'
+      - '**/*.cpp'
+      - '**/*.cxx'
       - '**/*.h'
+      - '**/*.hh'
+      - '**/*.hpp'
+      - '**/*.hxx'
+      - '**/*.mm'
+      - '**/CMakeLists.txt'
       - '.github/workflows/*.yml'
       - '.github/workflows/*.yaml'
       - '**/action.yml'

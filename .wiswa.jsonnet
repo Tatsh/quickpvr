@@ -7,7 +7,8 @@
   keywords: ['dreamcast', 'powervr', 'pvr', 'pvrtc', 'quicklook', 'texture'],
   license: 'BSD-3-Clause',
   security_policy_supported_versions: { '1.0.x': ':white_check_mark:' },
-  want_codeql: true,
+  // .github/workflows/codeql.yml is maintained by hand to build on each platform.
+  want_codeql: false,
   want_tests: false,
   want_winget: false,
   clang_format_args: "$(git ls-files '*.cpp' '*.h' '*.mm' ':!:src/pvr/pvrtc.cpp')",
