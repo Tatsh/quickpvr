@@ -1,0 +1,127 @@
+{
+  "contributors": ["Andrew Udvare <audvare@gmail.com>"],
+  "cspell": {
+    "cache": {
+      "useCache": true
+    },
+    "dictionaryDefinitions": [
+      {
+        "name": "main",
+        "path": ".vscode/dictionary.txt"
+      }
+    ],
+    "enableFileTypes": {
+      "*": true
+    },
+    "enableGlobDot": true,
+    "files": ["**"],
+    "ignorePaths": [
+      "*.1",
+      "*.har",
+      "*.lock",
+      ".git/**",
+      ".yarn/**/*.cjs",
+      ".vscode/extensions.json",
+      ".wiswa-ci/**",
+      "dist/**",
+      "man/**"
+    ],
+    "language": "en-GB",
+    "languageSettings": [
+      {
+        "dictionaries": ["main"],
+        "languageId": "*"
+      }
+    ],
+    "useGitignore": true
+  },
+  "description": "QuickLook previews and a converter for PowerVR and Sega Dreamcast PVR textures.",
+  "devDependencies": {
+    "@prettier/plugin-xml": "^3.4.2",
+    "cspell": "^10.5.2",
+    "markdownlint-cli2": "^0.24.1",
+    "prettier": "^3.10.1",
+    "prettier-plugin-ini": "^1.3.0",
+    "prettier-plugin-sort-json": "^4.2.0",
+    "prettier-plugin-toml": "^4.1.0"
+  },
+  "files": ["LICENSE.txt", "README.md"],
+  "homepage": "https://tatsh.github.io/quickpvr/",
+  "keywords": ["dreamcast", "powervr", "pvr", "pvrtc", "quicklook", "texture"],
+  "license": "BSD-3-Clause",
+  "markdownlint-cli2": {
+    "config": {
+      "MD024": {
+        "siblings_only": true
+      },
+      "MD033": {
+        "allowed_elements": ["kbd"]
+      },
+      "default": true,
+      "line-length": {
+        "code_blocks": false,
+        "line_length": 100,
+        "tables": false
+      }
+    },
+    "gitignore": true,
+    "globs": ["**/*.md", "**/*.mdc"],
+    "noBanner": true,
+    "showFound": true
+  },
+  "name": "quickpvr",
+  "packageManager": "yarn@4.19.0",
+  "prettier": {
+    "endOfLine": "lf",
+    "iniSpaceAroundEquals": true,
+    "jsonRecursiveSort": true,
+    "overrides": [
+      {
+        "files": ["*.json.dist", "package.json"],
+        "options": {
+          "parser": "json"
+        }
+      },
+      {
+        "files": ["*.toml"],
+        "options": {
+          "singleQuote": false
+        }
+      },
+      {
+        "files": [".clang-format"],
+        "options": {
+          "parser": "yaml"
+        }
+      },
+      {
+        "files": ["*.plist", "*.plist.in"],
+        "options": {
+          "parser": "xml"
+        }
+      }
+    ],
+    "plugins": [
+      "@prettier/plugin-xml",
+      "prettier-plugin-ini",
+      "prettier-plugin-sort-json",
+      "prettier-plugin-toml"
+    ],
+    "printWidth": 100,
+    "reorderKeys": true,
+    "singleQuote": true
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Tatsh/quickpvr.git"
+  },
+  "scripts": {
+    "build": "cmake --preset=default -DBUILD_DOCS=ON && cmake --build build",
+    "check-formatting": "clang-format --dry-run --Werror $(git ls-files '*.cpp' '*.h' '*.mm' ':!:src/pvr/pvrtc.cpp') && prettier --check . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2",
+    "check-spelling": "cspell --no-progress .",
+    "dict:update": "rm -f .vscode/dictionary.txt && cspell lint --no-progress --no-summary --unique --words-only | LC_ALL=C tr '[:upper:]' '[:lower:]' | LC_ALL=C sort -u > .vscode/dictionary.txt",
+    "format": "clang-format -i $(git ls-files '*.cpp' '*.h' '*.mm' ':!:src/pvr/pvrtc.cpp') && prettier --write . && markdownlint-cli2 --config package.json --configPointer /markdownlint-cli2 --fix",
+    "qa": "yarn check-spelling && yarn check-formatting"
+  },
+  "version": "1.0.0"
+}

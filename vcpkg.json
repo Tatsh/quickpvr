@@ -1,0 +1,22 @@
+{
+  "dependencies": [
+    {
+      "name": "argparse"
+    },
+    {
+      "name": "spdlog"
+    },
+    {
+      "name": "stb"
+    }
+  ],
+  "description": "QuickLook previews and a converter for PowerVR and Sega Dreamcast PVR textures.",
+  "documentation": "https://quickpvr.readthedocs.org",
+  "homepage": "https://tatsh.github.io/quickpvr/",
+  "license": "BSD-3-Clause",
+  "maintainers": [
+    "Andrew Udvare <audvare@gmail.com>"
+  ],
+  "name": "quickpvr",
+  "version": "1.0.0"
+}

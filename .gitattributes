@@ -1,0 +1,7 @@
+* text=auto eol=lf
+*.PVR binary
+*.lock binary
+*.pvp binary
+*.pvr binary
+/.github/workflows/actions.lock text diff merge
+/.yarn/**/*.cjs binary
