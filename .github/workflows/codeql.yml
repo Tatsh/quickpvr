@@ -65,8 +65,10 @@ jobs:
         uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
           persist-credentials: false
+      # Homebrew's spdlog is arm64 only, but builds traced by CodeQL target x86_64, so the pinned
+      # spdlog is built from source with the project instead.
       - name: 'Install dependencies'
-        run: 'brew install ninja spdlog'
+        run: 'brew install ninja'
       - name: 'Initialize CodeQL'
         uses: 'github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934'
         with:
