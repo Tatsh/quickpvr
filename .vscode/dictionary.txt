@@ -1,6 +1,5 @@
 advapi
 amtc
-analyzer
 apartmentthreaded
 appdir
 appex
@@ -27,7 +26,6 @@ codesign
 coinit
 coloroncolor
 commitizen
-copytree
 coveragerc
 ctest
 dashcam
@@ -40,7 +38,6 @@ destdir
 didentity
 dllmain
 docstrings
-dquickpvr
 dreamcast
 endforeach
 endfunction
@@ -51,7 +48,6 @@ fobjc
 foxundermoon
 fsanitize
 gbix
-graphviz
 grgb
 gwenview
 gwlp
@@ -66,10 +62,12 @@ jinja
 jsonnet
 jsonschema
 kcoreaddons
+libasan
 libgcc
 libpvr
 libsonnet
 libstdc
+libubsan
 logfontw
 lpfn
 lpsz
@@ -83,7 +81,6 @@ msvc
 municode
 mypy
 noaggregation
-nojekyll
 nominmax
 noone
 nozorder
@@ -99,8 +96,6 @@ overlappedwindow
 paintstruct
 palettised
 palettized
-pathlib
-pipefail
 pipx
 powervr
 preapproved
@@ -130,7 +125,6 @@ qtpvr
 quicklook
 quickpvr
 quickpvrshell
-rdparty
 refclsid
 refiid
 reflow
@@ -139,8 +133,6 @@ regsvr
 rgba
 rgbg
 ripgreprc
-rmtree
-sarif
 sbclaude
 schemafile
 setopt
@@ -150,7 +142,6 @@ shellcheck
 shellformat
 shellimage
 shlwapi
-shutil
 snapcraft
 statusline
 stbi
