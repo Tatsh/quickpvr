@@ -1,4 +1,6 @@
-find_package(KF6 6.0 REQUIRED COMPONENTS CoreAddons KIO)
+# KDE Frameworks has no umbrella package configuration, so each framework is found on its own.
+find_package(KF6CoreAddons 6.0 REQUIRED)
+find_package(KF6KIO 6.0 REQUIRED)
 
 kcoreaddons_add_plugin(pvrthumbnail INSTALL_NAMESPACE "kf6/thumbcreator" SOURCES
                        pvrthumbnailcreator.cpp pvrthumbnailcreator.h)
