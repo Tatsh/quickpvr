@@ -1,0 +1,94 @@
+.Dd November 25, 2026
+.Dt PVR2PNG 1
+.Os
+.Sh NAME
+.Nm pvr2png
+.Nd convert PowerVR and Sega Dreamcast PVR textures to PNG
+.Sh SYNOPSIS
+.Nm
+.Op Fl iqs
+.Op Fl -debug
+.Op Fl o Ar path
+.Op Fl p Ar palette
+.Ar file ...
+.Sh DESCRIPTION
+.Nm
+decodes PowerVR textures (legacy PVR v1 and v2 headers, PVR v3, and headerless PVRTC written by
+Apple's
+.Xr texturetool 1 ) ,
+Sega Dreamcast
+.Sq PVRT
+textures with or without a
+.Sq GBIX
+header, and Dreamcast texture packs such as the
+.Pa *_T.PVR
+files of
+.Em Incoming ,
+and writes each texture as an 8-bit RGBA PNG.
+.Pp
+By default
+.Ar file Ns Pa .pvr
+is written as
+.Ar file Ns Pa .png
+in the same directory. A pack is written as
+.Ar file Ns Pa _000.png ,
+.Ar file Ns Pa _001.png ,
+and so on.
+.Pp
+The options are as follows:
+.Bl -tag -width Ds
+.It Fl i , Fl -info
+Print the container and the size and pixel format of each texture, and write nothing.
+.It Fl o Ar path , Fl -output Ar path
+With one input that yields one image,
+.Ar path
+is the PNG to write. Otherwise it is a directory, created if missing, for all output.
+.It Fl p Ar palette , Fl -palette Ar palette
+Use this Dreamcast
+.Sq PVPL
+palette for 4 and 8 bpp palettised textures. Without this option a
+.Pa .pvp
+file with the same name as the texture is used if present. Otherwise palette indices are shown as
+a grey ramp.
+.It Fl q , Fl -quiet
+Only log warnings and errors.
+.It Fl s , Fl -sheet
+Write a pack as one contact sheet instead of one PNG per texture.
+.It Fl -debug
+Enable debug logging.
+.It Fl v , Fl -version
+Print the version and exit.
+.It Fl h , Fl -help
+Print usage and exit.
+.El
+.Sh SUPPORTED FORMATS
+.Bl -tag -width Ds
+.It PVR v2
+ARGB and RGBA 4444, 1555, 5551, 565, 555, 888, 8888, 8332, BGRA8888, RGB332, I8, AI88, A8, AL44,
+PVRTC 2 and 4 bpp, and DXT1 to DXT5. Twiddled data and the vertical-flip flag are honoured.
+Uncompressed types not in this list are decoded from the channel masks in the header.
+.It PVR v3
+Uncompressed formats described by their channel names and bit counts (integer, normalised, signed,
+and floating-point channels), PVRTC 2 and 4 bpp, BC1 to BC5, UYVY, YUY2, RGBG8888, and GRGB8888.
+Orientation metadata and premultiplied alpha are honoured.
+.It Dreamcast
+ARGB1555, RGB565, ARGB4444, RGB555, YUV422, and bump-map texels in twiddled, twiddled rectangle,
+rectangle, stride, VQ, and small VQ layouts, with or without mipmaps (the full-size level is
+decoded), and 4 and 8 bpp palettised textures.
+.El
+.Sh EXIT STATUS
+.Nm
+exits 0 when every file was converted, 1 when a file or pack entry could not be converted, and 2
+on a usage error.
+.Sh EXAMPLES
+Convert the textures of a level's pack into a directory:
+.Dl $ pvr2png -o textures/ LEVEL1_T.PVR
+.Pp
+Show the size and format of a texture:
+.Dl $ pvr2png -i banner.pvr
+.Sh SEE ALSO
+QuickPVR.app provides Finder previews and thumbnails of the same formats.
+.Sh BUGS
+Headerless PVRTC is recognised only for square power-of-two textures. ETC, PVRTC-II, BC6, and BC7
+textures are not decoded. PVR v2 files written for OpenGL are sometimes stored bottom-up without
+the vertical-flip flag and are then shown upside down.

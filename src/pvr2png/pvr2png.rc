@@ -1,0 +1,2 @@
+// MinGW embeds the manifest through this script. MSVC uses pvr2png.manifest directly.
+1 24 "pvr2png.manifest"

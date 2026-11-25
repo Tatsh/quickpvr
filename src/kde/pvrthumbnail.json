@@ -1,0 +1,7 @@
+{
+  "CacheThumbnail": true,
+  "KPlugin": {
+    "MimeTypes": ["image/x-pvr"],
+    "Name": "PowerVR and Dreamcast textures"
+  }
+}

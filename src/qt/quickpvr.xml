@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<mime-info xmlns="http://www.freedesktop.org/standards/shared-mime-info">
+  <mime-type type="image/x-pvr">
+    <comment>PowerVR texture</comment>
+    <generic-icon name="image-x-generic" />
+    <magic priority="50">
+      <match type="string" value="PVR\003" offset="0" />
+      <match type="string" value="PVR!" offset="44" />
+      <match type="string" value="PVRT" offset="0" />
+      <match type="string" value="GBIX" offset="0" />
+    </magic>
+    <glob pattern="*.pvr" />
+  </mime-type>
+</mime-info>

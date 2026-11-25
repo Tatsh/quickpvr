@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN"
+  "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>CFBundleDevelopmentRegion</key>
+  <string>en</string>
+  <key>CFBundleDisplayName</key>
+  <string>QuickPVR</string>
+  <key>CFBundleDocumentTypes</key>
+  <array>
+    <dict>
+      <key>CFBundleTypeName</key>
+      <string>PVR Texture</string>
+      <key>CFBundleTypeRole</key>
+      <string>Viewer</string>
+      <key>LSHandlerRank</key>
+      <string>Alternate</string>
+      <key>LSItemContentTypes</key>
+      <array>
+        <string>public.pvr</string>
+      </array>
+      <key>NSDocumentClass</key>
+      <string>QPDocument</string>
+    </dict>
+  </array>
+  <key>CFBundleExecutable</key>
+  <string>QuickPVR</string>
+  <key>CFBundleIdentifier</key>
+  <string>sh.tat.quickpvr</string>
+  <key>CFBundleInfoDictionaryVersion</key>
+  <string>6.0</string>
+  <key>CFBundleName</key>
+  <string>QuickPVR</string>
+  <key>CFBundlePackageType</key>
+  <string>APPL</string>
+  <key>CFBundleShortVersionString</key>
+  <string>@PROJECT_VERSION@</string>
+  <key>CFBundleVersion</key>
+  <string>@PROJECT_VERSION@</string>
+  <key>LSApplicationCategoryType</key>
+  <string>public.app-category.graphics-design</string>
+  <key>LSMinimumSystemVersion</key>
+  <string>@CMAKE_OSX_DEPLOYMENT_TARGET@</string>
+  <key>NSHighResolutionCapable</key>
+  <true />
+  <key>NSHumanReadableCopyright</key>
+  <string>Copyright © 2009-2010 Limbic Software, Inc. Copyright © 2019-2026 Andrew Udvare.</string>
+  <key>NSPrincipalClass</key>
+  <string>NSApplication</string>
+  <key>UTImportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.image</string>
+        <string>public.data</string>
+      </array>
+      <key>UTTypeDescription</key>
+      <string>PowerVR texture</string>
+      <key>UTTypeIdentifier</key>
+      <string>public.pvr</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array>
+          <string>pvr</string>
+        </array>
+      </dict>
+    </dict>
+  </array>
+</dict>
+</plist>
