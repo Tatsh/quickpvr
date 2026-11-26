@@ -26,8 +26,8 @@ jobs:
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
             -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER -DCMAKE_INSTALL_PREFIX=/usr \
-            -DQUICKPVR_BUILD_KDE_THUMBNAILER=OFF -DQUICKPVR_BUILD_QT_PLUGIN=OFF \
-            -DCMAKE_C_FLAGS=-g -DCMAKE_CXX_FLAGS=-g
+            -DQUICKPVR_BUILD_KDE_METADATA=OFF -DQUICKPVR_BUILD_KDE_THUMBNAILER=OFF \
+            -DQUICKPVR_BUILD_QT_PLUGIN=OFF -DCMAKE_C_FLAGS=-g -DCMAKE_CXX_FLAGS=-g
           cmake --build build
       - name: 'Install'
         run: |
