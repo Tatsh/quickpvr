@@ -3,6 +3,7 @@
 #include <cstdint>
 #include <expected>
 #include <string>
+#include <string_view>
 #include <vector>
 
 #include <windows.h>
@@ -18,6 +19,14 @@ struct DecodedTexture {
     Pvr::Image image;     /*!< The texture or contact sheet. */
     std::wstring summary; /*!< Description such as `Dreamcast PVR · 256×256 RGB565, VQ`. */
 };
+
+/**
+ * Convert UTF-8 text to UTF-16.
+ *
+ * @param text The UTF-8 text.
+ * @return The UTF-16 text.
+ */
+std::wstring widen(std::string_view text);
 
 /**
  * Read a whole stream.

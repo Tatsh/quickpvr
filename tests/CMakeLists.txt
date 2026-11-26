@@ -10,7 +10,7 @@ if(WIN32 AND QUICKPVR_BUILD_WINDOWS_SHELL)
   add_executable(test_windows_shell test_windows_shell.cpp)
   target_compile_definitions(test_windows_shell PRIVATE NOMINMAX UNICODE _UNICODE
                                                         PVR_SAMPLES_DIR_WIDE=L"${PROJECT_SOURCE_DIR}/pvrsamples")
-  target_link_libraries(test_windows_shell PRIVATE ole32 shlwapi user32 gdi32 uuid)
+  target_link_libraries(test_windows_shell PRIVATE ole32 propsys shlwapi user32 gdi32 uuid)
   if(MINGW)
     target_link_options(test_windows_shell PRIVATE -municode -static)
   endif()

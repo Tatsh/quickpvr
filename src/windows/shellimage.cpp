@@ -15,6 +15,8 @@ constexpr std::uint64_t kMaxStreamSize = 256ULL * 1024 * 1024;
 constexpr ULONG kReadChunkSize = 1024 * 1024;
 constexpr std::size_t kChannelCount = 4;
 
+} // namespace
+
 std::wstring widen(std::string_view text) {
     if (text.empty()) {
         return {};
@@ -25,8 +27,6 @@ std::wstring widen(std::string_view text) {
     MultiByteToWideChar(CP_UTF8, 0, text.data(), static_cast<int>(text.size()), out.data(), length);
     return out;
 }
-
-} // namespace
 
 std::expected<std::vector<std::uint8_t>, HRESULT> readStream(IStream *stream) {
     if (stream == nullptr) {

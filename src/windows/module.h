@@ -14,6 +14,17 @@ constexpr CLSID kThumbnailProviderClsid = {
 /** CLSID of the preview handler: {AC027A4E-FFCB-4B25-A7B1-82AA9438AD36}. */
 constexpr CLSID kPreviewHandlerClsid = {
     0xac027a4e, 0xffcb, 0x4b25, {0xa7, 0xb1, 0x82, 0xaa, 0x94, 0x38, 0xad, 0x36}};
+/** CLSID of the property handler: {4E50AC88-3201-4D83-94E6-EC3284EF90C6}. */
+constexpr CLSID kPropertyHandlerClsid = {
+    0x4e50ac88, 0x3201, 0x4d83, {0x94, 0xe6, 0xec, 0x32, 0x84, 0xef, 0x90, 0xc6}};
+/**
+ * Format ID of the QuickPVR properties: {1E525950-E124-46EB-A8CF-06D726640602}. Property 2 is
+ * `QuickPVR.TextureCount`, described in QuickPVR.propdesc.
+ */
+constexpr GUID kPropertyFormatId = {
+    0x1e525950, 0xe124, 0x46eb, {0xa8, 0xcf, 0x06, 0xd7, 0x26, 0x64, 0x06, 0x02}};
+/** Property ID of `QuickPVR.TextureCount` in kPropertyFormatId. */
+constexpr DWORD kTextureCountPropertyId = 2;
 
 /** Handle of this DLL. */
 HINSTANCE moduleHandle();

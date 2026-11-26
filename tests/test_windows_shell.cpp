@@ -6,6 +6,10 @@
 
 #include <windows.h>
 
+// initguid.h makes propkey.h define the property keys instead of only declaring them.
+#include <initguid.h>
+#include <propkey.h>
+#include <propvarutil.h>
 #include <shlwapi.h>
 #include <shobjidl.h>
 #include <thumbcache.h>
@@ -16,6 +20,10 @@ constexpr CLSID kThumbnailProviderClsid = {
     0x3e28da40, 0xb072, 0x4328, {0x82, 0x1d, 0xf2, 0xa3, 0x90, 0x54, 0x84, 0x85}};
 constexpr CLSID kPreviewHandlerClsid = {
     0xac027a4e, 0xffcb, 0x4b25, {0xa7, 0xb1, 0x82, 0xaa, 0x94, 0x38, 0xad, 0x36}};
+constexpr CLSID kPropertyHandlerClsid = {
+    0x4e50ac88, 0x3201, 0x4d83, {0x94, 0xe6, 0xec, 0x32, 0x84, 0xef, 0x90, 0xc6}};
+constexpr PROPERTYKEY kTextureCountKey = {
+    {0x1e525950, 0xe124, 0x46eb, {0xa8, 0xcf, 0x06, 0xd7, 0x26, 0x64, 0x06, 0x02}}, 2};
 constexpr UINT kThumbnailSize = 256;
 
 using GetClassObject = HRESULT(__stdcall *)(REFCLSID, REFIID, void **);
@@ -88,6 +96,38 @@ SIZE thumbnailSize(GetClassObject getClassObject, const std::wstring &path, HRES
     return size;
 }
 
+// An empty PROPVARIANT means the handler does not provide the property.
+PROPVARIANT propertyValue(IPropertyStore *store, REFPROPERTYKEY key) {
+    PROPVARIANT value;
+    PropVariantInit(&value);
+    store->GetValue(key, &value);
+    return value;
+}
+
+ULONG numberProperty(IPropertyStore *store, REFPROPERTYKEY key) {
+    auto value = propertyValue(store, key);
+    ULONG number = 0;
+    PropVariantToUInt32(value, &number);
+    PropVariantClear(&value);
+    return number;
+}
+
+std::wstring textProperty(IPropertyStore *store, REFPROPERTYKEY key) {
+    auto value = propertyValue(store, key);
+    std::wstring text = value.vt == VT_LPWSTR ? value.pwszVal : L"";
+    PropVariantClear(&value);
+    return text;
+}
+
+IPropertyStore *propertyStore(GetClassObject getClassObject, const std::wstring &path) {
+    auto *store = createObject<IPropertyStore>(getClassObject, kPropertyHandlerClsid);
+    if (store != nullptr && !initializeWithFile(store, path)) {
+        store->Release();
+        return nullptr;
+    }
+    return store;
+}
+
 } // namespace
 
 int wmain(int argc, wchar_t *argv[]) {
@@ -105,6 +145,7 @@ int wmain(int argc, wchar_t *argv[]) {
         reinterpret_cast<GetClassObject>(GetProcAddress(module, "DllGetClassObject"));
     check(getClassObject != nullptr, "DllGetClassObject is exported");
     check(GetProcAddress(module, "DllRegisterServer") != nullptr, "DllRegisterServer is exported");
+    check(GetProcAddress(module, "DllInstall") != nullptr, "DllInstall is exported");
     if (getClassObject == nullptr) {
         return EXIT_FAILURE;
     }
@@ -142,6 +183,47 @@ int wmain(int argc, wchar_t *argv[]) {
         check(SUCCEEDED(handler->Unload()), "the preview is unloaded");
         handler->Release();
         DestroyWindow(parent);
+    }
+
+    auto *texture = propertyStore(getClassObject, sample(L"dreamcast/logo_argb4444_twiddled.pvr"));
+    check(texture != nullptr, "the property handler reads a texture");
+    if (texture != nullptr) {
+        check(numberProperty(texture, PKEY_Image_HorizontalSize) == 256 &&
+                  numberProperty(texture, PKEY_Image_VerticalSize) == 256,
+              "the width and height are 256");
+        check(textProperty(texture, PKEY_Image_Dimensions) == L"256 x 256",
+              "the dimensions are 256 x 256");
+        check(numberProperty(texture, PKEY_Image_BitDepth) == 16, "the bit depth is 16");
+        check(textProperty(texture, PKEY_Image_CompressionText)
+                  .starts_with(L"Dreamcast PVR, ARGB4444, twiddled"),
+              "the format includes the container and the pixel format");
+        check(numberProperty(texture, kTextureCountKey) == 0,
+              "a single texture does not have a texture count");
+        PROPVARIANT value;
+        InitPropVariantFromUInt32(1, &value);
+        check(texture->SetValue(PKEY_Image_BitDepth, value) == STG_E_ACCESSDENIED,
+              "the properties are read-only");
+        texture->Release();
+    }
+
+    auto *pack = propertyStore(getClassObject, sample(L"dreamcast/PACK_T.PVR"));
+    check(pack != nullptr, "the property handler reads a pack");
+    if (pack != nullptr) {
+        check(numberProperty(pack, kTextureCountKey) == 2, "the pack has 2 textures");
+        check(numberProperty(pack, PKEY_Image_HorizontalSize) == 0,
+              "a pack does not have a single width");
+        check(textProperty(pack, PKEY_Image_CompressionText).find(L"256x64") != std::wstring::npos,
+              "the format lists each texture of the pack");
+        pack->Release();
+    }
+
+    auto *notTexture = propertyStore(getClassObject, sample(L"../CMakeLists.txt"));
+    check(notTexture != nullptr, "the property handler accepts a file that is not a texture");
+    if (notTexture != nullptr) {
+        DWORD count = 1;
+        check(SUCCEEDED(notTexture->GetCount(&count)) && count == 0,
+              "a file that is not a texture does not have properties");
+        notTexture->Release();
     }
 
     std::cout << (failures == 0 ? "all passed\n" : "failures\n");

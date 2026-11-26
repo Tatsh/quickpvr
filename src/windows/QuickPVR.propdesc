@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<schema xmlns="http://schemas.microsoft.com/windows/2006/propertydescription" schemaVersion="1.0">
+  <propertyDescriptionList publisher="Tatsh" product="QuickPVR">
+    <propertyDescription name="QuickPVR.TextureCount"
+                         formatID="{1E525950-E124-46EB-A8CF-06D726640602}" propID="2">
+      <searchInfo inInvertedIndex="false" isColumn="true" columnIndexType="OnDisk" />
+      <typeInfo type="UInt32" isInnate="true" isViewable="true" isQueryable="true" />
+      <labelInfo label="Textures" />
+      <displayInfo displayType="Number" />
+    </propertyDescription>
+  </propertyDescriptionList>
+</schema>
