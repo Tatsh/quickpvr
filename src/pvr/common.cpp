@@ -241,8 +241,10 @@ contactSheet(std::span<const Image> images, std::uint32_t padding, const Options
     const auto columns =
         static_cast<std::uint32_t>(std::ceil(std::sqrt(static_cast<double>(count))));
     const auto rows = (count + columns - 1) / columns;
-    const auto width = static_cast<std::uint64_t>(columns) * cellWidth + (columns - 1) * padding;
-    const auto height = static_cast<std::uint64_t>(rows) * cellHeight + (rows - 1) * padding;
+    const auto width = static_cast<std::uint64_t>(columns) * cellWidth +
+                       static_cast<std::uint64_t>(columns - 1) * padding;
+    const auto height = static_cast<std::uint64_t>(rows) * cellHeight +
+                        static_cast<std::uint64_t>(rows - 1) * padding;
     if (width > options.maxDimension || height > options.maxDimension) {
         return fail(ErrorCode::TooLarge, "The contact sheet would be too large.");
     }

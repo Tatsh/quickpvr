@@ -588,6 +588,15 @@ TEST(enforcesSizeLimits) {
     CHECK(result.error().code == Pvr::ErrorCode::TooLarge);
 }
 
+TEST(contactSheetRejectsPaddingThatWouldWrap) {
+    // Seven images take three columns and three rows. In each dimension, two gaps of 0x80000001
+    // wrap to 2 in 32-bit arithmetic.
+    const std::vector<Pvr::Image> images(7, Pvr::Image{1, 1, Bytes(4), {}});
+    const auto sheet = Pvr::contactSheet(images, 0x80000001U);
+    CHECK(!sheet);
+    CHECK(sheet.error().code == Pvr::ErrorCode::TooLarge);
+}
+
 } // namespace
 
 int main(int argc, char *argv[]) {
