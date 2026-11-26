@@ -26,8 +26,13 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - A hidden desktop entry for Linux and BSD that opens `.pvr` files in Gwenview, installed with the
   Qt plugin (CMake option `QUICKPVR_INSTALL_GWENVIEW_ENTRY`).
 - A KIO thumbnailer, for Dolphin.
+- A KFileMetaData extractor, for the Details tab of Dolphin: dimensions, pixel format and bit depth,
+  container, and the number of textures in a pack.
 - The `image/x-pvr` MIME type for freedesktop systems.
-- An Explorer thumbnail provider and preview handler for Windows, registered per user.
+- An Explorer thumbnail provider, preview handler, and property handler for Windows. The property
+  handler shows the dimensions, bit depth, pixel format, and texture count in the Details tab and
+  the details pane, and needs an installation for every user.
+- Version information in the Windows executables, DLL, and installer.
 - Unit tests, run with `ctest`.
 - Release packages: a disk image of QuickPVR.app, an installer package for the legacy generator,
   and a `pvr2png` archive for macOS; NSIS installers and archives for Windows on x86-64 and Arm;
