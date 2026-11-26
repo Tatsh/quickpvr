@@ -31,6 +31,20 @@ if(QUICKPVR_BUILD_QT_PLUGIN)
   set_tests_properties(qt-plugin PROPERTIES ENVIRONMENT QT_QPA_PLATFORM=offscreen)
 endif()
 
+if(QUICKPVR_BUILD_KDE_THUMBNAILER)
+  find_package(KF6CoreAddons 6.0 REQUIRED)
+  find_package(KF6KIO 6.0 REQUIRED)
+  add_executable(test_kde_thumbnailer test_kde_thumbnailer.cpp)
+  target_link_libraries(test_kde_thumbnailer PRIVATE KF6::CoreAddons KF6::KIOGui)
+  target_compile_definitions(
+    test_kde_thumbnailer PRIVATE ${QUICKPVR_QT_DEFINITIONS}
+                                 PVR_SAMPLES_DIR="${PROJECT_SOURCE_DIR}/pvrsamples"
+                                 PVR_PLUGIN_DIR="${PROJECT_BINARY_DIR}/plugins")
+  add_dependencies(test_kde_thumbnailer pvrthumbnail)
+  add_test(NAME kde-thumbnailer COMMAND test_kde_thumbnailer)
+  set_tests_properties(kde-thumbnailer PROPERTIES ENVIRONMENT QT_QPA_PLATFORM=offscreen)
+endif()
+
 if(QUICKPVR_BUILD_CLI)
   set(_samples "${PROJECT_SOURCE_DIR}/pvrsamples")
   add_test(NAME pvr2png-help COMMAND pvr2png --help)
