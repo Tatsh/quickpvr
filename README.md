@@ -62,11 +62,16 @@ Each [release](https://github.com/Tatsh/quickpvr/releases) has these packages:
 | `quickpvr-*-macos-universal-Release.tar.gz`    | `pvr2png` and its manual page.                                 |
 | `quickpvr-*-windows-*-Release-setup.exe`       | `pvr2png` and the Explorer handlers, installed per user.       |
 | `quickpvr-*-windows-*-Release.zip`             | The same files, to register with `regsvr32` by hand.           |
-| `quickpvr-*-linux-x86-64-Release.tar.gz`       | `pvr2png`, the Qt plugin, and the thumbnailer, under `/usr`.   |
+| `quickpvr-*-appimage-*-Release.AppImage`       | `pvr2png` for Linux on x86-64 and aarch64.                     |
+| `quickpvr-*-flatpak-*-Release.flatpak`         | `pvr2png` as the Flatpak `sh.tat.pvr2png`.                     |
+| `quickpvr-*-snap-*-Release.snap`               | `pvr2png` as the snap `pvr2png`.                               |
 
 The packages are not notarised or signed by a known publisher, so macOS and Windows warn before
-opening them. The Linux package is built on the latest Ubuntu and needs its versions of Qt and KDE
-Frameworks. The packages ending in `-symbols` hold the debugging information.
+opening them. Install a downloaded snap with `snap install --dangerous`. The packages ending in
+`-symbols` or `-debug` hold the debugging information.
+
+On Linux, the Qt plugin and the Dolphin thumbnailer are not in the release packages. Install them
+from a distribution package or [build them](#building).
 
 ## Building
 

@@ -10,6 +10,7 @@
 .cspellcache
 .directory
 .pnp.*
+/*.snap
 /.bash_profile
 /.bashrc
 /.claude/auto-continue.md
@@ -25,6 +26,7 @@
 /.claude/standing-instructions.md
 /.claude/statusline-quota-cache.sh
 /.claude/stop-failure-events.jsonl
+/.flatpak-builder/
 /.gitconfig
 /.gitmodules
 /.idea
@@ -41,6 +43,8 @@
 /build-*/
 /build/
 /dist/
+/flatpak_app/
+/repo/
 /session-recover.yaml
 /vcpkg_installed/
 node_modules/

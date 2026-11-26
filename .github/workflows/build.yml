@@ -2,16 +2,18 @@ concurrency:
   cancel-in-progress: true
   group: 'build-${{ github.ref }}'
 jobs:
-  linux:
+  # On Linux only pvr2png is packaged. The Qt plugin and the thumbnailer come from a distribution
+  # package or a build from source.
+  appimage:
     env:
-      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-linux-x86-64-Release'
-    name: 'Linux x86-64'
+      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-appimage-${{ matrix.artifact_arch }}-Release'
+    name: 'pvr2png AppImage (${{ matrix.artifact_arch }})'
     needs: 'version'
     permissions:
       attestations: 'write'
       contents: 'read'
       id-token: 'write'
-    runs-on: 'ubuntu-latest'
+    runs-on: '${{ matrix.os }}'
     steps:
       - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
         with:
@@ -19,49 +21,143 @@ jobs:
       - name: 'Install dependencies'
         run: |
           sudo apt-get update
-          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev libkf6kio-dev \
-            ninja-build qt6-base-dev
+          sudo apt-get install -y appstream desktop-file-utils ninja-build
       - name: 'Configure and compile'
         run: |
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
             -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER -DCMAKE_INSTALL_PREFIX=/usr \
+            -DQUICKPVR_BUILD_KDE_THUMBNAILER=OFF -DQUICKPVR_BUILD_QT_PLUGIN=OFF \
             -DCMAKE_C_FLAGS=-g -DCMAKE_CXX_FLAGS=-g
           cmake --build build
       - name: 'Install'
-        run: 'DESTDIR="$PWD/staging" cmake --install build'
-      # Each binary keeps a link to its debugging information, which goes in a separate archive.
+        run: |
+          DESTDIR="$PWD/AppDir" cmake --install build
+          install -Dm644 packaging/linux/sh.tat.pvr2png.desktop \
+            AppDir/usr/share/applications/sh.tat.pvr2png.desktop
+          install -Dm644 packaging/linux/sh.tat.pvr2png.svg \
+            AppDir/usr/share/icons/hicolor/scalable/apps/sh.tat.pvr2png.svg
+          install -Dm644 packaging/linux/sh.tat.pvr2png.metainfo.xml \
+            AppDir/usr/share/metainfo/sh.tat.pvr2png.metainfo.xml
+          desktop-file-validate AppDir/usr/share/applications/sh.tat.pvr2png.desktop
+          appstreamcli validate --no-net AppDir/usr/share/metainfo/sh.tat.pvr2png.metainfo.xml
+          cp AppDir/usr/share/metainfo/sh.tat.pvr2png.metainfo.xml \
+            AppDir/usr/share/metainfo/sh.tat.pvr2png.appdata.xml
+      # The binary keeps a link to its debugging information, which goes in a separate archive.
       - name: 'Save the symbols'
         run: |
-          while IFS= read -r -d '' binary; do
-            readelf -h "$binary" > /dev/null 2>&1 || continue
-            relative="${binary#staging/}"
-            mkdir -p "symbols/${relative%/*}"
-            objcopy --only-keep-debug "$binary" "symbols/$relative.debug"
-            strip --strip-unneeded "$binary"
-            objcopy --add-gnu-debuglink="symbols/$relative.debug" "$binary"
-          done < <(find staging -type f -print0)
-          test -f symbols/usr/bin/pvr2png.debug
+          binary=AppDir/usr/bin/pvr2png
+          mkdir -p symbols/usr/bin
+          objcopy --only-keep-debug "$binary" symbols/usr/bin/pvr2png.debug
+          strip --strip-unneeded "$binary"
+          objcopy --add-gnu-debuglink=symbols/usr/bin/pvr2png.debug "$binary"
           tar -C symbols -czf "$PACKAGE-symbols.tar.gz" .
-      - name: 'Verify the installed converter'
-        run: >-
-          staging/usr/bin/pvr2png --info pvrsamples/dreamcast/logo_argb4444_twiddled.pvr
-      - name: 'Package'
+      # linuxdeploy builds the AppImage, and its checksum is that of the pinned release.
+      - env:
+          LDAI_NO_APPSTREAM: '1'
+          LDAI_OUTPUT: '${{ env.PACKAGE }}.AppImage'
+          LINUXDEPLOY_OUTPUT_VERSION: '${{ needs.version.outputs.version }}'
+          LINUXDEPLOY_SHA256: '${{ matrix.linuxdeploy_sha256 }}'
+        name: 'Build the AppImage'
         run: |
-          tar -C staging -czf "$PACKAGE.tar.gz" .
-          tar -tzf "$PACKAGE.tar.gz"
+          curl -fSL --retry 5 --retry-all-errors --retry-delay 5 -o linuxdeploy.AppImage \
+            "https://github.com/linuxdeploy/linuxdeploy/releases/download/1-alpha-20251107-1/linuxdeploy-$(uname -m).AppImage"
+          echo "$LINUXDEPLOY_SHA256  linuxdeploy.AppImage" | sha256sum -c
+          chmod +x linuxdeploy.AppImage
+          APPIMAGE_EXTRACT_AND_RUN=1 ./linuxdeploy.AppImage --appdir AppDir \
+            --desktop-file=AppDir/usr/share/applications/sh.tat.pvr2png.desktop --output appimage
+      - name: 'Verify the AppImage'
+        run: >-
+          APPIMAGE_EXTRACT_AND_RUN=1 "./$PACKAGE.AppImage" --info
+          pvrsamples/dreamcast/logo_argb4444_twiddled.pvr
       - if: "github.event_name != 'pull_request'"
         name: 'Attest the packages'
         uses: 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
         with:
-          subject-path: 'quickpvr-*.tar.gz'
+          subject-path: |
+            ${{ env.PACKAGE }}.AppImage
+            ${{ env.PACKAGE }}-symbols.tar.gz
       - name: 'Upload the packages'
         uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
         with:
           if-no-files-found: 'error'
           name: '${{ env.PACKAGE }}'
           path: |
-            ${{ env.PACKAGE }}.tar.gz
+            ${{ env.PACKAGE }}.AppImage
             ${{ env.PACKAGE }}-symbols.tar.gz
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact_arch: 'x86-64'
+            linuxdeploy_sha256: 'c20cd71e3a4e3b80c3483cef793cda3f4e990aca14014d23c544ca3ce1270b4d'
+            os: 'ubuntu-latest'
+          - artifact_arch: 'aarch64'
+            linuxdeploy_sha256: '620095110d693282b8ebeb244a95b5e911cf8f65f76c88b4b47d16ae6346fcff'
+            os: 'ubuntu-24.04-arm'
+  flatpak:
+    container:
+      image: 'ghcr.io/flathub-infra/flatpak-github-actions:freedesktop-25.08@sha256:c91a88269eee8fcdd73ecf43064232fbebe27411f926f63f38bdf70c51f2ceae'
+      options: '--privileged'
+    env:
+      NODE_OPTIONS: '--no-deprecation'
+      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-flatpak-${{ matrix.artifact_arch }}-Release'
+    name: 'pvr2png Flatpak (${{ matrix.artifact_arch }})'
+    needs: 'version'
+    permissions:
+      attestations: 'write'
+      contents: 'read'
+      id-token: 'write'
+    runs-on: '${{ matrix.os }}'
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # The manifest builds the release tag of its version, and the build of a commit builds the
+      # checkout instead.
+      - name: 'Build the checked-out source'
+        run: |
+          manifest=sh.tat.pvr2png.yml
+          url="url: 'https:\/\/github\.com\/Tatsh\/quickpvr\.git'"
+          skip="skip: ['.flatpak-builder', 'flatpak_app', 'repo']"
+          sed -i -E "s#^(\s+)- tag: 'v[0-9][^']*'\$#\1- path: '.'#" "$manifest"
+          range="/^\s+- path: '\.'\$/,/^\s+${url}\$/"
+          sed -i -E "${range}{s#^(\s+)type: 'git'#\1${skip}\n\1type: 'dir'#;/url: /d}" "$manifest"
+          grep -q "^\s*- path: '\.'\$" "$manifest"
+          ! grep -q 'github.com/Tatsh/quickpvr' "$manifest"
+      - uses: 'flatpak/flatpak-github-actions/flatpak-builder@79327416609af08178ad73b352877e51450790b3'
+        with:
+          arch: '${{ matrix.arch }}'
+          build-debug-bundle: true
+          bundle: '${{ env.PACKAGE }}.flatpak'
+          cache: false
+          manifest-path: 'sh.tat.pvr2png.yml'
+          upload-artifact: false
+      - name: 'Verify the Flatpak symbols'
+        run: 'test -f "$PACKAGE-debug.flatpak"'
+      - if: "github.event_name != 'pull_request'"
+        name: 'Attest the Flatpak'
+        uses: 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
+        with:
+          subject-path: '${{ env.PACKAGE }}*.flatpak'
+      - name: 'Upload the Flatpak'
+        uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        with:
+          if-no-files-found: 'error'
+          name: '${{ env.PACKAGE }}'
+          path: |
+            ${{ env.PACKAGE }}.flatpak
+            ${{ env.PACKAGE }}-debug.flatpak
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - arch: 'x86_64'
+            artifact_arch: 'x86-64'
+            os: 'ubuntu-latest'
+          - arch: 'aarch64'
+            artifact_arch: 'aarch64'
+            os: 'ubuntu-24.04-arm'
   macos:
     env:
       PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-macos-universal-Release'
@@ -169,7 +265,7 @@ jobs:
   release:
     if: "github.ref_type == 'tag'"
     name: 'Attach to the release'
-    needs: ['linux', 'macos', 'windows']
+    needs: ['appimage', 'flatpak', 'macos', 'snap', 'windows']
     permissions:
       contents: 'write'
     runs-on: 'ubuntu-latest'
@@ -192,6 +288,90 @@ jobs:
           gh release view "$TAG" > /dev/null 2>&1 \
             || gh release create "$TAG" --draft --notes '' --title "$TAG" --verify-tag
           xargs -d '\n' gh release upload "$TAG" --clobber < packages.txt
+  snap:
+    env:
+      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-snap-${{ matrix.artifact_arch }}-Release'
+    name: 'pvr2png Snap (${{ matrix.artifact_arch }})'
+    needs: 'version'
+    permissions:
+      attestations: 'write'
+      contents: 'read'
+      id-token: 'write'
+    runs-on: '${{ matrix.os }}'
+    steps:
+      # The version of the snap is the description of the commit by its tags.
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      # The snap builds the release tag of its version, and the build of a commit builds the
+      # checkout instead.
+      - name: 'Build the checked-out source'
+        run: |
+          remote="source: 'https://github\.com/Tatsh/quickpvr\.git'"
+          sed -i -E -e "s#^(\s+)${remote}\$#\1source: '.'#" \
+            -e "/^\s+source-tag: 'v[0-9][^']*'\$/d" snapcraft.yaml
+          grep -q "^\s*source: '\.'\$" snapcraft.yaml
+          ! grep -q 'github.com/Tatsh/quickpvr' snapcraft.yaml
+      - env:
+          SNAPCRAFT_BUILD_ENVIRONMENT: 'lxd'
+          SNAPCRAFT_BUILD_INFO: '1'
+          SNAPCRAFT_IMAGE_INFO: >-
+            {"build_url":"https://github.com/${{ github.repository }}/actions/runs/${{ github.run_id }}"}
+        name: 'Build the snap'
+        run: |
+          if [[ ! -x /usr/bin/snap ]]; then
+            sudo apt-get update -q
+            sudo apt-get install -qy snapd
+          fi
+          if [[ "$(stat -c '%u:%g' /)" != '0:0' ]]; then
+            sudo chown root:root /
+          fi
+          sudo groupadd --force --system lxd
+          sudo usermod --append --groups lxd "$USER"
+          if [[ -x /snap/bin/lxd ]]; then
+            sudo snap refresh lxd || true
+          else
+            sudo snap install lxd
+          fi
+          sudo lxd init --auto
+          sudo iptables -P FORWARD ACCEPT
+          if [[ -x /snap/bin/snapcraft ]]; then
+            sudo snap refresh --channel stable --classic snapcraft
+          else
+            sudo snap install --channel stable --classic snapcraft
+          fi
+          sudo -u "$USER" -E snapcraft
+      - name: 'Version the snap filename'
+        run: |
+          shopt -s nullglob
+          snaps=(*.snap)
+          [[ ${#snaps[@]} -eq 1 ]]
+          [[ "${snaps[0]}" == "$PACKAGE.snap" ]] || mv -- "${snaps[0]}" "$PACKAGE.snap"
+      - name: 'Verify the snap'
+        run: |
+          sudo snap install --dangerous "$PACKAGE.snap"
+          cp pvrsamples/dreamcast/logo_argb4444_twiddled.pvr "$HOME/"
+          /snap/bin/pvr2png --info "$HOME/logo_argb4444_twiddled.pvr"
+      - if: "github.event_name != 'pull_request'"
+        name: 'Attest the snap'
+        uses: 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
+        with:
+          subject-path: '${{ env.PACKAGE }}.snap'
+      - name: 'Upload the snap'
+        uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        with:
+          if-no-files-found: 'error'
+          name: '${{ env.PACKAGE }}'
+          path: '${{ env.PACKAGE }}.snap'
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - artifact_arch: 'x86-64'
+            os: 'ubuntu-latest'
+          - artifact_arch: 'aarch64'
+            os: 'ubuntu-24.04-arm'
   version:
     name: 'Package version'
     outputs:

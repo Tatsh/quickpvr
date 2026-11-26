@@ -29,7 +29,7 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 - Unit tests, run with `ctest`.
 - Release packages: a disk image of QuickPVR.app, an installer package for the legacy generator,
   and a `pvr2png` archive for macOS; NSIS installers and archives for Windows on x86-64 and Arm;
-  and an archive for Linux.
+  and `pvr2png` as an AppImage, a Flatpak, and a snap for Linux on x86-64 and aarch64.
 
 ### Changed
 

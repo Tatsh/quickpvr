@@ -4,7 +4,9 @@ amtc
 apartmentthreaded
 appdir
 appex
+appimage
 appl
+appstreamcli
 archs
 argb
 argparse
@@ -18,6 +20,7 @@ bindir
 bndl
 brighterday
 bsky
+bugtracker
 buildsystems
 bytearray
 cfurl
@@ -33,6 +36,7 @@ coloroncolor
 commitizen
 coreaddons
 coveragerc
+craftctl
 ctest
 darch
 dashcam
@@ -60,6 +64,7 @@ erasebkgnd
 esac
 esbenp
 fapplication
+flathub
 fobjc
 foxundermoon
 fsanitize
@@ -86,11 +91,13 @@ jsonnet
 jsonschema
 kcoreaddons
 lastexitcode
+ldai
 libgcc
 libkf
 libpvr
 libsonnet
 libstdc
+linuxdeploy
 lipo
 localappdata
 logfontw
@@ -105,6 +112,7 @@ makensis
 mandir
 mapfile
 mdfile
+metainfo
 miniaturizable
 mktemp
 mountpoint
@@ -118,6 +126,7 @@ noone
 nozorder
 npvr
 nsis
+nullglob
 nullptr
 numpydoc
 objc
@@ -162,8 +171,8 @@ qtpvr
 quicklook
 quickpvr
 quickpvrshell
-readelf
 readlink
+rect
 refclsid
 refiid
 reflow
@@ -180,6 +189,7 @@ shellcheck
 shellformat
 shellimage
 shlwapi
+shopt
 snapcraft
 statusline
 stbi
@@ -199,6 +209,7 @@ udvare
 udzo
 undraft
 undrafted
+usermod
 uyvy
 vendored
 venv

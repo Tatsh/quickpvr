@@ -10,7 +10,9 @@
       "README.md",
       "package.json",
       "vcpkg.json",
-      "man/pvr2png.1"
+      "man/pvr2png.1",
+      "sh.tat.pvr2png.yml",
+      "snapcraft.yaml"
     ],
     "version_provider": "npm",
     "version_scheme": "semver"

@@ -1,0 +1,40 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<component type="console-application">
+  <id>sh.tat.pvr2png</id>
+  <metadata_license>CC0-1.0</metadata_license>
+  <project_license>BSD-3-Clause</project_license>
+  <name>pvr2png</name>
+  <summary>Convert PowerVR and Sega Dreamcast textures to PNG</summary>
+  <description>
+    <p>
+      pvr2png converts PowerVR (PVR v1, v2, and v3), Apple PVRTC, and Sega Dreamcast textures and
+      texture packs to PNG files.
+    </p>
+    <p>
+      It decodes uncompressed textures, PVRTC, DXT1 to DXT5, BC1 to BC5, YUV, twiddled and VQ
+      Dreamcast textures, and palettised Dreamcast textures with their palettes.
+    </p>
+  </description>
+  <developer id="sh.tat">
+    <name>Andrew Udvare</name>
+  </developer>
+  <url type="homepage">https://github.com/Tatsh/quickpvr</url>
+  <url type="bugtracker">https://github.com/Tatsh/quickpvr/issues</url>
+  <categories>
+    <category>Graphics</category>
+  </categories>
+  <keywords>
+    <keyword>Dreamcast</keyword>
+    <keyword>PowerVR</keyword>
+    <keyword>PVR</keyword>
+    <keyword>PVRTC</keyword>
+    <keyword>texture</keyword>
+  </keywords>
+  <provides>
+    <binary>pvr2png</binary>
+  </provides>
+  <content_rating type="oars-1.1" />
+  <releases>
+    <release date="2026-11-25" version="1.0.0" />
+  </releases>
+</component>

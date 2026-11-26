@@ -1,0 +1,35 @@
+app-id: 'sh.tat.pvr2png'
+command: 'pvr2png'
+finish-args:
+  - '--filesystem=/media'
+  - '--filesystem=/run/media'
+  - '--filesystem=home'
+modules:
+  # FetchContent downloads the pinned argparse, spdlog, and stb.
+  - build-options:
+      build-args:
+        - '--share=network'
+    builddir: true
+    buildsystem: 'cmake-ninja'
+    config-opts:
+      - '-DBUILD_TESTING=OFF'
+      - '-DCMAKE_BUILD_TYPE=RelWithDebInfo'
+      - '-DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER'
+      - '-DQUICKPVR_BUILD_KDE_THUMBNAILER=OFF'
+      - '-DQUICKPVR_BUILD_QT_PLUGIN=OFF'
+    name: 'pvr2png'
+    post-install:
+      - 'install -Dm644 ../LICENSE.txt "${FLATPAK_DEST}/share/licenses/${FLATPAK_ID}/LICENSE.txt"'
+      - >-
+        install -Dm644 ../packaging/linux/sh.tat.pvr2png.metainfo.xml
+        "${FLATPAK_DEST}/share/metainfo/${FLATPAK_ID}.metainfo.xml"
+      - >-
+        install -Dm644 ../packaging/linux/sh.tat.pvr2png.svg
+        "${FLATPAK_DEST}/share/icons/hicolor/scalable/apps/${FLATPAK_ID}.svg"
+    sources:
+      - tag: 'v1.0.0'
+        type: 'git'
+        url: 'https://github.com/Tatsh/quickpvr.git'
+runtime: 'org.freedesktop.Platform'
+runtime-version: '25.08'
+sdk: 'org.freedesktop.Sdk'

@@ -95,8 +95,6 @@ jobs:
         name: 'Check that every package is attached'
         run: |
           required=(
-            "quickpvr-${TAG}-linux-x86-64-Release.tar.gz"
-            "quickpvr-${TAG}-linux-x86-64-Release-symbols.tar.gz"
             "QuickPVR-${TAG}-macos-universal-Release.dmg"
             "quickpvr-${TAG}-macos-universal-Release-qlgenerator.pkg"
             "quickpvr-${TAG}-macos-universal-Release.tar.gz"
@@ -106,6 +104,13 @@ jobs:
             required+=("quickpvr-${TAG}-${platform}-Release.zip")
             required+=("quickpvr-${TAG}-${platform}-Release-setup.exe")
             required+=("quickpvr-${TAG}-${platform}-Release-symbols.zip")
+          done
+          for architecture in x86-64 aarch64; do
+            required+=("quickpvr-${TAG}-appimage-${architecture}-Release.AppImage")
+            required+=("quickpvr-${TAG}-appimage-${architecture}-Release-symbols.tar.gz")
+            required+=("quickpvr-${TAG}-flatpak-${architecture}-Release.flatpak")
+            required+=("quickpvr-${TAG}-flatpak-${architecture}-Release-debug.flatpak")
+            required+=("quickpvr-${TAG}-snap-${architecture}-Release.snap")
           done
           mapfile -t attached < <(gh release view "$TAG" --json assets --jq '.assets[].name')
           echo "${TAG} has ${#attached[@]} packages attached."

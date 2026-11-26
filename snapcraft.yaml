@@ -1,0 +1,40 @@
+adopt-info: 'pvr2png'
+apps:
+  pvr2png:
+    command: 'usr/bin/pvr2png'
+    plugs:
+      - 'home'
+      - 'removable-media'
+base: 'core24'
+confinement: 'strict'
+description: |
+  pvr2png converts PowerVR (PVR v1, v2, and v3), Apple PVRTC, and Sega Dreamcast textures and
+  texture packs to PNG files. It decodes uncompressed textures, PVRTC, DXT1 to DXT5, BC1 to BC5,
+  YUV, twiddled and VQ Dreamcast textures, and palettised Dreamcast textures with their palettes.
+grade: 'stable'
+icon: 'packaging/linux/sh.tat.pvr2png.svg'
+license: 'BSD-3-Clause'
+name: 'pvr2png'
+parts:
+  pvr2png:
+    build-packages:
+      - 'git'
+      - 'ninja-build'
+    cmake-generator: 'Ninja'
+    cmake-parameters:
+      - '-DBUILD_TESTING=OFF'
+      - '-DCMAKE_BUILD_TYPE=Release'
+      - '-DCMAKE_INSTALL_PREFIX=/usr'
+      - '-DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER'
+      - '-DQUICKPVR_BUILD_KDE_THUMBNAILER=OFF'
+      - '-DQUICKPVR_BUILD_QT_PLUGIN=OFF'
+    override-pull: |
+      craftctl default
+      craftctl set version="$(git describe --always --tags)"
+    plugin: 'cmake'
+    source: 'https://github.com/Tatsh/quickpvr.git'
+    source-tag: 'v1.0.0'
+platforms:
+  amd64: null
+  arm64: null
+summary: 'Convert PowerVR and Sega Dreamcast textures to PNG'

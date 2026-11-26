@@ -49,7 +49,7 @@
   },
   cz+: {
     commitizen+: {
-      version_files+: ['man/pvr2png.1'],
+      version_files+: ['man/pvr2png.1', 'sh.tat.pvr2png.yml', 'snapcraft.yaml'],
     },
   },
   gitattributes+: ['*.pvp binary', '*.pvr binary', '*.PVR binary'],
@@ -77,7 +77,7 @@
     '*.pvr',
     '*.PVR',
   ],
-  shared_ignore+: ['/build-*/'],
+  shared_ignore+: ['/*.snap', '/.flatpak-builder/', '/build-*/', '/flatpak_app/', '/repo/'],
   vcpkg+: {
     dependencies: [
       { name: 'argparse' },

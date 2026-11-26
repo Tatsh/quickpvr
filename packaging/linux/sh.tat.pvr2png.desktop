@@ -1,0 +1,10 @@
+[Desktop Entry]
+Type=Application
+Name=pvr2png
+Comment=Convert PowerVR and Sega Dreamcast textures to PNG
+Exec=pvr2png %F
+Icon=sh.tat.pvr2png
+Terminal=true
+NoDisplay=true
+Categories=Graphics;ConsoleOnly;
+Keywords=Dreamcast;PowerVR;PVR;PVRTC;texture;
