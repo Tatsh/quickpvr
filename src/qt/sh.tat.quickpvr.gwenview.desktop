@@ -1,0 +1,12 @@
+[Desktop Entry]
+Type=Application
+Name=Gwenview
+GenericName=Image Viewer
+Comment=View PowerVR and Sega Dreamcast textures
+Exec=gwenview %U
+TryExec=gwenview
+Icon=gwenview
+MimeType=image/x-pvr;
+NoDisplay=true
+Terminal=false
+Categories=Graphics;Viewer;

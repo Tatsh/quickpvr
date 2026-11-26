@@ -33,6 +33,8 @@ jobs:
           plugins="staging$("$qtpaths" --query QT_INSTALL_PLUGINS)"
           test -f "$plugins/imageformats/libqpvr.so"
           test -f "$plugins/kf6/thumbcreator/pvrthumbnail.so"
+          sudo apt-get install -y desktop-file-utils
+          desktop-file-validate staging/usr/share/applications/sh.tat.quickpvr.gwenview.desktop
   macos:
     name: 'macOS'
     runs-on: 'macos-15'

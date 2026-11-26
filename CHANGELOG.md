@@ -23,6 +23,8 @@ adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
   and later.
 - The `pvr2png` converter and its manual page. It writes PNG files with stb_image_write.
 - A Qt 6 image format plugin, for Gwenview and other Qt applications.
+- A hidden desktop entry for Linux and BSD that opens `.pvr` files in Gwenview, installed with the
+  Qt plugin (CMake option `QUICKPVR_INSTALL_GWENVIEW_ENTRY`).
 - A KIO thumbnailer, for Dolphin.
 - The `image/x-pvr` MIME type for freedesktop systems.
 - An Explorer thumbnail provider and preview handler for Windows, registered per user.

@@ -87,25 +87,29 @@ ctest --test-dir build
 cmake --install build --prefix /usr/local
 ```
 
-| Option                           | Default                 | Description                                       |
-| -------------------------------- | ----------------------- | ------------------------------------------------- |
-| `QUICKPVR_BUILD_CLI`             | `ON`                    | Build `pvr2png`.                                  |
-| `QUICKPVR_BUILD_QUICKLOOK`       | `ON` on macOS           | Build QuickPVR.app with the QuickLook extensions. |
-| `QUICKPVR_BUILD_QLGENERATOR`     | `ON` on macOS           | Build the legacy generator, embedded in the app.  |
-| `QUICKPVR_CODESIGN_IDENTITY`     | `-`                     | Signing identity for the bundles (`-` is ad hoc). |
-| `QUICKPVR_INSTALL_APPDIR`        | `<prefix>/Applications` | Where QuickPVR.app is installed.                  |
-| `QUICKPVR_BUILD_QT_PLUGIN`       | `ON` on Linux and BSD   | Build the Qt image format plugin.                 |
-| `QUICKPVR_BUILD_KDE_THUMBNAILER` | `ON` on Linux and BSD   | Build the KIO thumbnailer for Dolphin.            |
-| `QUICKPVR_BUILD_WINDOWS_SHELL`   | `ON` on Windows         | Build the Explorer thumbnail and preview DLL.     |
-| `BUILD_DOCS`                     | `OFF`                   | Build the API documentation with Doxygen.         |
+| Option                            | Default                 | Description                                                         |
+| --------------------------------- | ----------------------- | ------------------------------------------------------------------- |
+| `QUICKPVR_BUILD_CLI`              | `ON`                    | Build `pvr2png`.                                                    |
+| `QUICKPVR_BUILD_QUICKLOOK`        | `ON` on macOS           | Build QuickPVR.app with the QuickLook extensions.                   |
+| `QUICKPVR_BUILD_QLGENERATOR`      | `ON` on macOS           | Build the legacy generator, embedded in the app.                    |
+| `QUICKPVR_CODESIGN_IDENTITY`      | `-`                     | Signing identity for the bundles (`-` is ad hoc).                   |
+| `QUICKPVR_INSTALL_APPDIR`         | `<prefix>/Applications` | Where QuickPVR.app is installed.                                    |
+| `QUICKPVR_BUILD_QT_PLUGIN`        | `ON` on Linux and BSD   | Build the Qt image format plugin.                                   |
+| `QUICKPVR_BUILD_KDE_THUMBNAILER`  | `ON` on Linux and BSD   | Build the KIO thumbnailer for Dolphin.                              |
+| `QUICKPVR_INSTALL_GWENVIEW_ENTRY` | `ON` on Linux and BSD   | Install a hidden desktop entry that opens `.pvr` files in Gwenview. |
+| `QUICKPVR_BUILD_WINDOWS_SHELL`    | `ON` on Windows         | Build the Explorer thumbnail and preview DLL.                       |
+| `BUILD_DOCS`                      | `OFF`                   | Build the API documentation with Doxygen.                           |
 
 ## Using QuickPVR on Linux
 
 Install with `cmake --install`, then register the `image/x-pvr` type by running
 `update-mime-database` on the `mime` directory the files went to (for example
-`update-mime-database /usr/share/mime`).
-Gwenview then opens `.pvr` files. In Dolphin, enable PowerVR and Dreamcast textures under Configure
-Dolphin, Interface, and Previews.
+`update-mime-database /usr/share/mime`). Also run `update-desktop-database` on the `applications`
+directory (for example `update-desktop-database /usr/share/applications`). Distribution packages
+usually run both commands.
+
+Gwenview then opens `.pvr` files, including on a double-click in Dolphin. In Dolphin, enable
+PowerVR and Dreamcast textures under Configure Dolphin, Interface, and Previews.
 
 ## Using the QuickLook extensions
 

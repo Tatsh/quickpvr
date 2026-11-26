@@ -30,3 +30,15 @@ endif()
 if(NOT APPLE)
   install(FILES quickpvr.xml DESTINATION "${CMAKE_INSTALL_DATADIR}/mime/packages")
 endif()
+
+# Gwenview fixes its list of MIME types at build time, and the list does not include image/x-pvr.
+# The hidden desktop entry starts Gwenview for image/x-pvr and is ignored where Gwenview is not
+# installed.
+option(QUICKPVR_INSTALL_GWENVIEW_ENTRY "Open .pvr files with Gwenview (freedesktop systems)." ON)
+if(QUICKPVR_BUILD_QT_PLUGIN
+   AND QUICKPVR_INSTALL_GWENVIEW_ENTRY
+   AND NOT APPLE
+   AND NOT WIN32)
+  install(FILES sh.tat.quickpvr.gwenview.desktop
+          DESTINATION "${CMAKE_INSTALL_DATADIR}/applications")
+endif()
