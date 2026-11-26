@@ -39,7 +39,7 @@ if(QUICKPVR_BUILD_KDE_THUMBNAILER)
   target_compile_definitions(
     test_kde_thumbnailer PRIVATE ${QUICKPVR_QT_DEFINITIONS}
                                  PVR_SAMPLES_DIR="${PROJECT_SOURCE_DIR}/pvrsamples"
-                                 PVR_PLUGIN_DIR="${PROJECT_BINARY_DIR}/plugins")
+                                 PVR_PLUGIN_DIR="$<TARGET_FILE_DIR:pvrthumbnail>/../..")
   add_dependencies(test_kde_thumbnailer pvrthumbnail)
   add_test(NAME kde-thumbnailer COMMAND test_kde_thumbnailer)
   set_tests_properties(kde-thumbnailer PROPERTIES ENVIRONMENT QT_QPA_PLATFORM=offscreen)

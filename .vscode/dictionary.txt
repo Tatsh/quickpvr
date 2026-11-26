@@ -90,6 +90,7 @@ jinja
 jsonnet
 jsonschema
 kcoreaddons
+kdec
 lastexitcode
 ldai
 libgcc
@@ -142,7 +143,6 @@ palettised
 palettized
 pipx
 pkgbuild
-plugindir
 plutil
 powervr
 preapproved
@@ -184,6 +184,7 @@ regsvr
 rgba
 rgbg
 ripgreprc
+sarif
 sbclaude
 schemafile
 shcne

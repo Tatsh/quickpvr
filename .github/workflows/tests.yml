@@ -16,7 +16,7 @@ jobs:
             ninja-build qt6-base-dev
       - name: 'Configure'
         run: >-
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr
           -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined'
           -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined'
       - name: 'Build'
@@ -28,7 +28,7 @@ jobs:
       # Qt and KIO only load plugins from Qt's plugin directory, such as /usr/lib64/qt6/plugins.
       - name: 'Verify installed plugins'
         run: |
-          DESTDIR="$PWD/staging" cmake --install build --prefix /usr
+          DESTDIR="$PWD/staging" cmake --install build
           qtpaths=$(command -v qtpaths6 || echo /usr/lib/qt6/bin/qtpaths6)
           plugins="staging$("$qtpaths" --query QT_INSTALL_PLUGINS)"
           test -f "$plugins/imageformats/libqpvr.so"

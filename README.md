@@ -78,7 +78,7 @@ from a distribution package or [build them](#building).
 Building requires CMake 3.25 or later and a C++23 compiler with `std::expected` (Clang 17, GCC 13, or
 later). `pvr2png` also needs spdlog, argparse, and stb, each downloaded when it is not installed.
 The macOS parts need the macOS 12 SDK or later. The Qt plugin needs Qt 6, and the thumbnailer needs
-KDE Frameworks 6 (KIO and KCoreAddons).
+KDE Frameworks 6 (KIO and KCoreAddons) and Extra CMake Modules.
 
 ```shell
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -101,6 +101,10 @@ cmake --install build --prefix /usr/local
 | `BUILD_DOCS`                      | `OFF`                   | Build the API documentation with Doxygen.                           |
 
 ## Using QuickPVR on Linux
+
+Configure with the prefix of Qt, normally `-DCMAKE_INSTALL_PREFIX=/usr`. The thumbnailer goes in the
+plugin directory of Qt (for example `/usr/lib64/qt6/plugins/kf6/thumbcreator`) only when the prefix
+matches. Changing the prefix with `cmake --install --prefix` does not move the thumbnailer.
 
 Install with `cmake --install`, then register the `image/x-pvr` type by running
 `update-mime-database` on the `mime` directory the files went to (for example
