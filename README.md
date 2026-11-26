@@ -60,7 +60,7 @@ Each [release](https://github.com/Tatsh/quickpvr/releases) has these packages:
 | `QuickPVR-*-macos-universal-Release.dmg`       | QuickPVR.app with its QuickLook extensions, for macOS 12+.     |
 | `quickpvr-*-macos-universal-*-qlgenerator.pkg` | The legacy generator in `/Library/QuickLook`, for macOS 12–14. |
 | `quickpvr-*-macos-universal-Release.tar.gz`    | `pvr2png` and its manual page.                                 |
-| `quickpvr-*-windows-*-Release-setup.exe`       | `pvr2png` and the Explorer handlers, installed per user.       |
+| `quickpvr-*-windows-*-Release-setup.exe`       | `pvr2png` and the Explorer handlers, for all or one user.      |
 | `quickpvr-*-windows-*-Release.zip`             | The same files, to register with `regsvr32` by hand.           |
 | `quickpvr-*-appimage-*-Release.AppImage`       | `pvr2png` for Linux on x86-64 and aarch64.                     |
 | `quickpvr-*-flatpak-*-Release.flatpak`         | `pvr2png` as the Flatpak `sh.tat.pvr2png`.                     |
@@ -124,11 +124,19 @@ Quick Look (or under Privacy & Security and Extensions on macOS 13 and 14).
 ## Using QuickPVR on Windows
 
 Build with Visual Studio 2022 or MinGW-w64 (GCC 13 or later). To cross-compile with MinGW-w64, pass
-`-DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-x86_64.cmake`. Register the DLL for the current
-user with `regsvr32 QuickPVRShell.dll` and remove it with `regsvr32 /u QuickPVRShell.dll`. Neither
-command needs administrator rights. After registration, Explorer shows thumbnails of `.pvr` files
-and previews them in the preview pane. Restart Explorer if thumbnails of files already viewed do not
-change.
+`-DCMAKE_TOOLCHAIN_FILE=cmake/toolchains/mingw-w64-x86_64.cmake`.
+
+The installer offers to install for everyone or only for the current user. Explorer then shows
+thumbnails of `.pvr` files and previews them in the preview pane. Installing for everyone needs
+administrator rights and also adds the dimensions, bit depth, pixel format, and texture count to
+the Details tab of Properties and to the details pane. Windows loads property handlers only when
+they are registered for every user. For a silent installation, pass `/S` with `/AllUsers` or
+`/CurrentUser`.
+
+To register the DLL by hand, place `QuickPVR.propdesc` next to it and run
+`regsvr32 /n /i:machine QuickPVRShell.dll` as an administrator for every user, or
+`regsvr32 QuickPVRShell.dll` for the current user. Add `/u` to remove the registration. Restart
+Explorer if thumbnails of files already viewed do not change.
 
 ## Licence
 

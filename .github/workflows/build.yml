@@ -464,25 +464,53 @@ jobs:
           NSIS_ARCHITECTURE: '${{ matrix.platform.nsis_architecture }}'
         shell: 'pwsh'
       - name: 'Verify the installer'
+        # The runner has administrator rights. Both installation modes are tested. Only an
+        # installation for every user registers the property handler.
         run: |
-          $directory = "$env:LOCALAPPDATA\Programs\QuickPVR"
           $thumbnailProvider = '{3E28DA40-B072-4328-821D-F2A390548485}'
-          $server = "HKCU:\Software\Classes\CLSID\$thumbnailProvider\InprocServer32"
-          $setup = Start-Process -FilePath ".\$env:PACKAGE-setup.exe" -ArgumentList '/S' `
-            -Wait -PassThru
-          if ($setup.ExitCode -ne 0) { throw "Setup exited with $($setup.ExitCode)." }
-          foreach ($name in 'pvr2png.exe', 'QuickPVRShell.dll', 'uninstall.exe') {
-            if (-not (Test-Path "$directory\$name")) { throw "Setup did not install $name." }
+          $propertyHandler = '{4E50AC88-3201-4D83-94E6-EC3284EF90C6}'
+          $propertyHandlers = 'HKLM:\SOFTWARE\Microsoft\Windows\CurrentVersion\PropertySystem\' +
+            'PropertyHandlers\.pvr'
+          $details = 'HKLM:\SOFTWARE\Classes\SystemFileAssociations\.pvr'
+          $modes = @(
+            @{ Name = 'AllUsers'; Directory = "$env:ProgramFiles\QuickPVR"; Root = 'HKLM:' },
+            @{ Name = 'CurrentUser'; Directory = "$env:LOCALAPPDATA\Programs\QuickPVR"
+              Root = 'HKCU:' }
+          )
+          foreach ($mode in $modes) {
+            $directory = $mode.Directory
+            $server = "$($mode.Root)\SOFTWARE\Classes\CLSID\$thumbnailProvider\InprocServer32"
+            $setup = Start-Process -FilePath ".\$env:PACKAGE-setup.exe" `
+              -ArgumentList '/S', "/$($mode.Name)" -Wait -PassThru
+            if ($setup.ExitCode -ne 0) {
+              throw "$($mode.Name) setup exited with $($setup.ExitCode)."
+            }
+            $files = 'pvr2png.exe', 'QuickPVRShell.dll', 'QuickPVR.propdesc', 'uninstall.exe'
+            foreach ($name in $files) {
+              if (-not (Test-Path "$directory\$name")) { throw "Setup did not install $name." }
+            }
+            $registered = (Get-ItemProperty $server).'(default)'
+            if ($registered -ne "$directory\QuickPVRShell.dll") {
+              throw "The thumbnail provider is registered as '$registered'."
+            }
+            $handlerKey = Get-ItemProperty $propertyHandlers -ErrorAction SilentlyContinue
+            $handler = $handlerKey.'(default)'
+            if ($mode.Name -eq 'AllUsers') {
+              if ($handler -ne $propertyHandler) { throw "The property handler is '$handler'." }
+              $fullDetails = (Get-ItemProperty $details).FullDetails
+              if ($fullDetails -notmatch 'System\.Image\.Dimensions') {
+                throw "The Details tab lists '$fullDetails'."
+              }
+            } elseif ($handler) {
+              throw 'A current-user installation registered a property handler.'
+            }
+            $uninstall = Start-Process -FilePath "$directory\uninstall.exe" `
+              -ArgumentList '/S', "/$($mode.Name)", "_?=$directory" -Wait -PassThru
+            if ($uninstall.ExitCode -ne 0) { throw "Uninstall exited with $($uninstall.ExitCode)." }
+            if (Test-Path $server) { throw 'Uninstall did not remove the thumbnail provider.' }
+            if (Test-Path $propertyHandlers) { throw 'Uninstall did not remove the property handler.' }
+            if (Test-Path "$directory\QuickPVRShell.dll") { throw 'Uninstall did not remove the DLL.' }
           }
-          $registered = (Get-ItemProperty $server).'(default)'
-          if ($registered -ne "$directory\QuickPVRShell.dll") {
-            throw "The thumbnail provider is registered as '$registered'."
-          }
-          $uninstall = Start-Process -FilePath "$directory\uninstall.exe" `
-            -ArgumentList '/S', "_?=$directory" -Wait -PassThru
-          if ($uninstall.ExitCode -ne 0) { throw "Uninstall exited with $($uninstall.ExitCode)." }
-          if (Test-Path $server) { throw 'Uninstall left the thumbnail provider registered.' }
-          if (Test-Path "$directory\QuickPVRShell.dll") { throw 'Uninstall left the DLL.' }
         shell: 'pwsh'
       - if: "github.event_name != 'pull_request'"
         name: 'Attest the packages'
