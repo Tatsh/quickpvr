@@ -12,6 +12,10 @@ target_compile_definitions(qp_qt_image PUBLIC ${_quickpvr_qt_definitions})
 target_link_libraries(qp_qt_image PUBLIC Qt6::Gui quickpvr::pvr)
 set_target_properties(qp_qt_image PROPERTIES POSITION_INDEPENDENT_CODE ON)
 
+set(QUICKPVR_INSTALL_QTPLUGINDIR
+    "${QT6_INSTALL_PLUGINS}"
+    CACHE PATH "Qt plugin directory for the image format plugin and the thumbnailer.")
+
 if(QUICKPVR_BUILD_QT_PLUGIN)
   qt_add_plugin(qpvr PLUGIN_TYPE imageformats CLASS_NAME PvrPlugin)
   target_sources(qpvr PRIVATE pvrhandler.cpp pvrhandler.h pvrplugin.cpp pvrplugin.h)
@@ -19,9 +23,6 @@ if(QUICKPVR_BUILD_QT_PLUGIN)
                                                    "${PROJECT_BINARY_DIR}/plugins/imageformats")
   target_link_libraries(qpvr PRIVATE qp_qt_image)
 
-  set(QUICKPVR_INSTALL_QTPLUGINDIR
-      "${QT6_INSTALL_PLUGINS}"
-      CACHE PATH "Qt plugin directory the imageformats plugin is installed under.")
   install(TARGETS qpvr LIBRARY DESTINATION "${QUICKPVR_INSTALL_QTPLUGINDIR}/imageformats")
 endif()
 

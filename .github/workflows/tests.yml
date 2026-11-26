@@ -25,6 +25,14 @@ jobs:
           QT_QPA_PLATFORM: 'offscreen'
         name: 'Test'
         run: 'ctest --test-dir build --output-on-failure'
+      # Qt and KIO only load plugins from Qt's plugin directory, such as /usr/lib64/qt6/plugins.
+      - name: 'Verify installed plugins'
+        run: |
+          DESTDIR="$PWD/staging" cmake --install build --prefix /usr
+          qtpaths=$(command -v qtpaths6 || echo /usr/lib/qt6/bin/qtpaths6)
+          plugins="staging$("$qtpaths" --query QT_INSTALL_PLUGINS)"
+          test -f "$plugins/imageformats/libqpvr.so"
+          test -f "$plugins/kf6/thumbcreator/pvrthumbnail.so"
   macos:
     name: 'macOS'
     runs-on: 'macos-15'

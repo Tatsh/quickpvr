@@ -95,6 +95,7 @@ ldai
 libgcc
 libkf
 libpvr
+libqpvr
 libsonnet
 libstdc
 linuxdeploy
@@ -141,6 +142,7 @@ palettised
 palettized
 pipx
 pkgbuild
+plugindir
 plutil
 powervr
 preapproved
@@ -166,6 +168,7 @@ qlmanage
 qobject
 qpvr
 qstringbuilder
+qtpaths
 qtplugindir
 qtpvr
 quicklook
