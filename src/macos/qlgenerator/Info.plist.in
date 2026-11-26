@@ -58,5 +58,26 @@
   <true />
   <key>QLThumbnailMinimumSize</key>
   <integer>17</integer>
+  <key>UTImportedTypeDeclarations</key>
+  <array>
+    <dict>
+      <key>UTTypeConformsTo</key>
+      <array>
+        <string>public.image</string>
+        <string>public.data</string>
+      </array>
+      <key>UTTypeDescription</key>
+      <string>PowerVR texture</string>
+      <key>UTTypeIdentifier</key>
+      <string>public.pvr</string>
+      <key>UTTypeTagSpecification</key>
+      <dict>
+        <key>public.filename-extension</key>
+        <array>
+          <string>pvr</string>
+        </array>
+      </dict>
+    </dict>
+  </array>
 </dict>
 </plist>
