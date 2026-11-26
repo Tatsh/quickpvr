@@ -38,8 +38,8 @@ jobs:
       - name: 'Install dependencies'
         run: |
           sudo apt-get update
-          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev libkf6kio-dev \
-            ninja-build qt6-base-dev
+          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev \
+            libkf6filemetadata-dev libkf6kio-dev ninja-build qt6-base-dev
       - name: 'Initialize CodeQL'
         uses: 'github/codeql-action/init@915412ff23e8b7659517e607487dbeae018f2934'
         with:

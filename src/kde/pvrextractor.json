@@ -1,0 +1,9 @@
+{
+  "Id": "sh.tat.quickpvr.extractor",
+  "MimeTypes": {
+    "image/x-pvr": {
+      "Version": "0.0"
+    }
+  },
+  "Name": "PowerVR and Dreamcast textures"
+}

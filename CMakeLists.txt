@@ -35,6 +35,8 @@ option(QUICKPVR_BUILD_QT_PLUGIN "Build the Qt image format plugin (Gwenview and 
        ${_quickpvr_freedesktop_default})
 option(QUICKPVR_BUILD_KDE_THUMBNAILER "Build the KIO thumbnailer (Dolphin)."
        ${_quickpvr_freedesktop_default})
+option(QUICKPVR_BUILD_KDE_METADATA "Build the KFileMetaData extractor (Dolphin Details tab)."
+       ${_quickpvr_freedesktop_default})
 option(QUICKPVR_BUILD_QUICKLOOK "Build QuickPVR.app with its QuickLook extensions (macOS only)."
        ${_quickpvr_macos_default})
 option(QUICKPVR_BUILD_QLGENERATOR

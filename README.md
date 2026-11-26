@@ -77,8 +77,9 @@ from a distribution package or [build them](#building).
 
 Building requires CMake 3.25 or later and a C++23 compiler with `std::expected` (Clang 17, GCC 13, or
 later). `pvr2png` also needs spdlog, argparse, and stb, each downloaded when it is not installed.
-The macOS parts need the macOS 12 SDK or later. The Qt plugin needs Qt 6, and the thumbnailer needs
-KDE Frameworks 6 (KIO and KCoreAddons) and Extra CMake Modules.
+The macOS parts need the macOS 12 SDK or later. The Qt plugin needs Qt 6. The thumbnailer needs
+KDE Frameworks 6 (KIO and KCoreAddons) and Extra CMake Modules, and the metadata extractor needs
+KFileMetaData from KDE Frameworks 6.
 
 ```shell
 cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release
@@ -96,15 +97,17 @@ cmake --install build --prefix /usr/local
 | `QUICKPVR_INSTALL_APPDIR`         | `<prefix>/Applications` | Where QuickPVR.app is installed.                                    |
 | `QUICKPVR_BUILD_QT_PLUGIN`        | `ON` on Linux and BSD   | Build the Qt image format plugin.                                   |
 | `QUICKPVR_BUILD_KDE_THUMBNAILER`  | `ON` on Linux and BSD   | Build the KIO thumbnailer for Dolphin.                              |
+| `QUICKPVR_BUILD_KDE_METADATA`     | `ON` on Linux and BSD   | Build the metadata extractor for the Details tab of Dolphin.        |
 | `QUICKPVR_INSTALL_GWENVIEW_ENTRY` | `ON` on Linux and BSD   | Install a hidden desktop entry that opens `.pvr` files in Gwenview. |
 | `QUICKPVR_BUILD_WINDOWS_SHELL`    | `ON` on Windows         | Build the Explorer thumbnail and preview DLL.                       |
 | `BUILD_DOCS`                      | `OFF`                   | Build the API documentation with Doxygen.                           |
 
 ## Using QuickPVR on Linux
 
-Configure with the prefix of Qt, normally `-DCMAKE_INSTALL_PREFIX=/usr`. The thumbnailer goes in the
-plugin directory of Qt (for example `/usr/lib64/qt6/plugins/kf6/thumbcreator`) only when the prefix
-matches. Changing the prefix with `cmake --install --prefix` does not move the thumbnailer.
+Configure with the prefix of Qt, normally `-DCMAKE_INSTALL_PREFIX=/usr`. The thumbnailer and the
+metadata extractor go in the plugin directory of Qt (for example
+`/usr/lib64/qt6/plugins/kf6/thumbcreator` and `kf6/kfilemetadata`) only when the prefix matches.
+Changing the prefix with `cmake --install --prefix` does not move either plugin.
 
 Install with `cmake --install`, then register the `image/x-pvr` type by running
 `update-mime-database` on the `mime` directory the files went to (for example
@@ -113,7 +116,9 @@ directory (for example `update-desktop-database /usr/share/applications`). Distr
 usually run both commands.
 
 Gwenview then opens `.pvr` files, including on a double-click in Dolphin. In Dolphin, enable
-PowerVR and Dreamcast textures under Configure Dolphin, Interface, and Previews.
+PowerVR and Dreamcast textures under Configure Dolphin, Interface, and Previews. For a texture, the
+Details tab of the file properties shows the dimensions, the pixel format and bit depth, and the
+container. For a pack, it shows the number of textures and the size and format of each.
 
 ## Using the QuickLook extensions
 

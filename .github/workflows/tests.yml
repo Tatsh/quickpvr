@@ -12,8 +12,8 @@ jobs:
       - name: 'Install dependencies'
         run: |
           sudo apt-get update
-          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev libkf6kio-dev \
-            ninja-build qt6-base-dev
+          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev \
+            libkf6filemetadata-dev libkf6kio-dev ninja-build qt6-base-dev
       - name: 'Configure'
         run: >-
           cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr
@@ -33,6 +33,7 @@ jobs:
           plugins="staging$("$qtpaths" --query QT_INSTALL_PLUGINS)"
           test -f "$plugins/imageformats/libqpvr.so"
           test -f "$plugins/kf6/thumbcreator/pvrthumbnail.so"
+          test -f "$plugins/kf6/kfilemetadata/quickpvrextractor.so"
           sudo apt-get install -y desktop-file-utils
           desktop-file-validate staging/usr/share/applications/sh.tat.quickpvr.gwenview.desktop
   macos:

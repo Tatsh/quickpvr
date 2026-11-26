@@ -15,6 +15,7 @@ asuser
 autobrief
 automoc
 autoresizing
+baloo
 bgra
 bindir
 bndl
@@ -100,6 +101,7 @@ jsonnet
 jsonschema
 kcoreaddons
 kdec
+kfilemetadata
 lastexitcode
 ldai
 libgcc
@@ -166,6 +168,7 @@ propertyhandler
 propertykey
 propsys
 pvpl
+pvrextractor
 pvrhandler
 pvrimage
 pvrplugin
@@ -185,12 +188,14 @@ qlgenerator
 qlmanage
 qobject
 qpvr
+qsizetype
 qstringbuilder
 qtpaths
 qtplugindir
 qtpvr
 quicklook
 quickpvr
+quickpvrextractor
 quickpvrshell
 readlink
 rect
