@@ -3,6 +3,15 @@ list(APPEND CMAKE_MODULE_PATH ${ECM_MODULE_PATH})
 include(KDEInstallDirs6)
 include(KDECMakeSettings)
 
+# KDEInstallDirs6 uses the plugin directory of Qt only when CMAKE_INSTALL_PREFIX at configure time
+# matches the prefix of Qt. Otherwise it uses <prefix>/lib/plugins (lib64 on some systems), where Qt
+# and KIO do not look. Setting KDE_INSTALL_PLUGINDIR to the plugin directory of Qt relative to the
+# prefix, as the image format plugin does, also works with a prefix given to cmake --install.
+if(NOT KDE_INSTALL_USE_QT_SYS_PATHS)
+  find_package(Qt6 6.2 REQUIRED COMPONENTS Core)
+  set(KDE_INSTALL_PLUGINDIR "${QT6_INSTALL_PLUGINS}")
+endif()
+
 # KDE Frameworks has no umbrella package configuration. Each framework is found separately.
 find_package(KF6CoreAddons 6.0 REQUIRED)
 

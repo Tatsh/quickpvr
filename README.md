@@ -104,10 +104,11 @@ cmake --install build --prefix /usr/local
 
 ## Using QuickPVR on Linux
 
-Configure with the prefix of Qt, normally `-DCMAKE_INSTALL_PREFIX=/usr`. The thumbnailer and the
-metadata extractor go in the plugin directory of Qt (for example
-`/usr/lib64/qt6/plugins/kf6/thumbcreator` and `kf6/kfilemetadata`) only when the prefix matches.
-Changing the prefix with `cmake --install --prefix` does not move either plugin.
+Set the prefix of Qt, normally `/usr`, either at configure time with
+`-DCMAKE_INSTALL_PREFIX=/usr` or at install time with `cmake --install build --prefix /usr`. The
+image format plugin, the thumbnailer, and the metadata extractor go in the plugin directory of Qt
+under the prefix (for example `/usr/lib64/qt6/plugins/imageformats`, `kf6/thumbcreator`, and
+`kf6/kfilemetadata`), where Qt and KIO load them.
 
 Install with `cmake --install`, then register the `image/x-pvr` type by running
 `update-mime-database` on the `mime` directory the files went to (for example

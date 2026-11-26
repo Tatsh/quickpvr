@@ -157,6 +157,7 @@ palettised
 palettized
 pipx
 pkgbuild
+plugindir
 plutil
 powervr
 preapproved

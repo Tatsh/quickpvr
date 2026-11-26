@@ -16,7 +16,7 @@ jobs:
             libkf6filemetadata-dev libkf6kio-dev ninja-build qt6-base-dev
       - name: 'Configure'
         run: >-
-          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug -DCMAKE_INSTALL_PREFIX=/usr
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Debug
           -DCMAKE_CXX_FLAGS='-fsanitize=address,undefined'
           -DCMAKE_EXE_LINKER_FLAGS='-fsanitize=address,undefined'
       - name: 'Build'
@@ -25,10 +25,12 @@ jobs:
           QT_QPA_PLATFORM: 'offscreen'
         name: 'Test'
         run: 'ctest --test-dir build --output-on-failure'
-      # Qt and KIO only load plugins from Qt's plugin directory, such as /usr/lib64/qt6/plugins.
+      # Qt and KIO only load plugins from Qt's plugin directory, such as /usr/lib64/qt6/plugins. The
+      # build is configured with the default prefix and installed with --prefix /usr. Every plugin
+      # must still go in Qt's plugin directory.
       - name: 'Verify installed plugins'
         run: |
-          DESTDIR="$PWD/staging" cmake --install build
+          DESTDIR="$PWD/staging" cmake --install build --prefix /usr
           qtpaths=$(command -v qtpaths6 || echo /usr/lib/qt6/bin/qtpaths6)
           plugins="staging$("$qtpaths" --query QT_INSTALL_PLUGINS)"
           test -f "$plugins/imageformats/libqpvr.so"
