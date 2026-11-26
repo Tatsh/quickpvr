@@ -1,4 +1,3 @@
-#include <cstdio>
 #include <cstdlib>
 #include <exception>
 #include <expected>
@@ -12,6 +11,7 @@
 #include <vector>
 
 #include <argparse/argparse.hpp>
+#include <spdlog/fmt/fmt.h>
 #include <spdlog/spdlog.h>
 
 #include "logging.h"
@@ -98,9 +98,7 @@ std::filesystem::path targetPath(const std::filesystem::path &directory,
     if (count == 1) {
         return directory / (stem + ".png");
     }
-    char suffix[16];
-    std::snprintf(suffix, sizeof suffix, "_%03zu.png", index);
-    return directory / (stem + suffix);
+    return directory / fmt::format("{}_{:03}.png", stem, index);
 }
 
 // Returns whether every image of the file was written.
