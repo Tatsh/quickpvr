@@ -1,0 +1,13 @@
+#!/bin/sh
+# QuickLook and Launch Services keep a cache for each user, so the generator and its file type are
+# registered for whoever is logged in at the console.
+generator="$2/Library/QuickLook/QuickPVR.qlgenerator"
+services=/System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework
+lsregister="$services/Support/lsregister"
+user=$(stat -f %Su /dev/console)
+if [ -n "$user" ] && [ "$user" != root ] && [ -d "$generator" ]; then
+  uid=$(id -u "$user")
+  launchctl asuser "$uid" sudo -u "$user" "$lsregister" -f "$generator" || true
+  launchctl asuser "$uid" sudo -u "$user" /usr/bin/qlmanage -r > /dev/null 2>&1 || true
+fi
+exit 0

@@ -1,0 +1,348 @@
+concurrency:
+  cancel-in-progress: true
+  group: 'build-${{ github.ref }}'
+jobs:
+  linux:
+    env:
+      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-linux-x86-64-Release'
+    name: 'Linux x86-64'
+    needs: 'version'
+    permissions:
+      attestations: 'write'
+      contents: 'read'
+      id-token: 'write'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - name: 'Install dependencies'
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y extra-cmake-modules libkf6coreaddons-dev libkf6kio-dev \
+            ninja-build qt6-base-dev
+      - name: 'Configure and compile'
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER -DCMAKE_INSTALL_PREFIX=/usr \
+            -DCMAKE_C_FLAGS=-g -DCMAKE_CXX_FLAGS=-g
+          cmake --build build
+      - name: 'Install'
+        run: 'DESTDIR="$PWD/staging" cmake --install build'
+      # Each binary keeps a link to its debugging information, which goes in a separate archive.
+      - name: 'Save the symbols'
+        run: |
+          while IFS= read -r -d '' binary; do
+            readelf -h "$binary" > /dev/null 2>&1 || continue
+            relative="${binary#staging/}"
+            mkdir -p "symbols/${relative%/*}"
+            objcopy --only-keep-debug "$binary" "symbols/$relative.debug"
+            strip --strip-unneeded "$binary"
+            objcopy --add-gnu-debuglink="symbols/$relative.debug" "$binary"
+          done < <(find staging -type f -print0)
+          test -f symbols/usr/bin/pvr2png.debug
+          tar -C symbols -czf "$PACKAGE-symbols.tar.gz" .
+      - name: 'Verify the installed converter'
+        run: >-
+          staging/usr/bin/pvr2png --info pvrsamples/dreamcast/logo_argb4444_twiddled.pvr
+      - name: 'Package'
+        run: |
+          tar -C staging -czf "$PACKAGE.tar.gz" .
+          tar -tzf "$PACKAGE.tar.gz"
+      - if: "github.event_name != 'pull_request'"
+        name: 'Attest the packages'
+        uses: 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
+        with:
+          subject-path: 'quickpvr-*.tar.gz'
+      - name: 'Upload the packages'
+        uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        with:
+          if-no-files-found: 'error'
+          name: '${{ env.PACKAGE }}'
+          path: |
+            ${{ env.PACKAGE }}.tar.gz
+            ${{ env.PACKAGE }}-symbols.tar.gz
+  macos:
+    env:
+      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-macos-universal-Release'
+    name: 'macOS universal'
+    needs: 'version'
+    permissions:
+      attestations: 'write'
+      contents: 'read'
+      id-token: 'write'
+    runs-on: 'macos-15'
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      - name: 'Install dependencies'
+        run: 'command -v ninja > /dev/null || brew install ninja'
+      # Every dependency is built from source with the project, so one build has both slices.
+      - name: 'Configure and compile'
+        run: |
+          cmake -S . -B build -G Ninja -DCMAKE_BUILD_TYPE=Release -DBUILD_TESTING=OFF \
+            -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER '-DCMAKE_OSX_ARCHITECTURES=arm64;x86_64' \
+            -DCMAKE_INSTALL_PREFIX=/usr/local -DQUICKPVR_INSTALL_APPDIR=/Applications \
+            -DCMAKE_C_FLAGS=-g -DCMAKE_CXX_FLAGS=-g -DCMAKE_OBJC_FLAGS=-g -DCMAKE_OBJCXX_FLAGS=-g
+          cmake --build build
+      - name: 'Install'
+        run: 'DESTDIR="$PWD/staging" cmake --install build'
+      - name: 'Save the symbols'
+        run: |
+          mkdir symbols
+          for binary in src/pvr2png/pvr2png \
+            src/macos/QuickPVR.app/Contents/MacOS/QuickPVR \
+            src/macos/QuickPVR.qlgenerator/Contents/MacOS/QuickPVR \
+            src/macos/QuickPVRPreview.appex/Contents/MacOS/QuickPVRPreview \
+            src/macos/QuickPVRThumbnail.appex/Contents/MacOS/QuickPVRThumbnail; do
+            name="${binary%%/Contents/*}"
+            name="${name##*/}"
+            dsymutil "build/$binary" -o "symbols/$name.dSYM"
+          done
+          ditto -c -k symbols "$PACKAGE-symbols.zip"
+      - name: 'Verify the installed converter'
+        run: |
+          converter=staging/usr/local/bin/pvr2png
+          [[ "$(lipo -archs "$converter")" =~ ^(x86_64 arm64|arm64 x86_64)$ ]]
+          "$converter" --info pvrsamples/dreamcast/logo_argb4444_twiddled.pvr
+      # A disk image keeps the signature of the app, which an artifact loses.
+      - name: 'Package the app'
+        run: |
+          app=staging/Applications/QuickPVR.app
+          codesign --verify --deep --strict "$app"
+          mkdir dmg-root
+          ditto "$app" dmg-root/QuickPVR.app
+          ln -s /Applications dmg-root/Applications
+          image="QuickPVR-${PACKAGE#quickpvr-}.dmg"
+          hdiutil create -volname QuickPVR -srcfolder dmg-root -ov -format UDZO "$image"
+          hdiutil attach -readonly -nobrowse -mountpoint dmg-check "$image"
+          test "$(readlink dmg-check/Applications)" = /Applications
+          codesign --verify --deep --strict dmg-check/QuickPVR.app
+          hdiutil detach dmg-check
+      # The generator is not relocatable, so Installer does not replace the copy inside the app.
+      - name: 'Package the legacy generator'
+        run: |
+          app=staging/Applications/QuickPVR.app
+          generator=pkg-root/Library/QuickLook/QuickPVR.qlgenerator
+          mkdir -p pkg-root/Library/QuickLook pkg-build pkg-resources
+          ditto "$app/Contents/Library/QuickLook/QuickPVR.qlgenerator" "$generator"
+          codesign --verify --strict "$generator"
+          pkgbuild --analyze --root pkg-root components.plist
+          plutil -replace 0.BundleIsRelocatable -bool NO components.plist
+          version=$(plutil -extract CFBundleShortVersionString raw -o - \
+            "$generator/Contents/Info.plist")
+          pkgbuild --root pkg-root --component-plist components.plist \
+            --identifier sh.tat.quickpvr.qlgenerator --version "$version" \
+            --install-location / --scripts packaging/macos/scripts \
+            pkg-build/QuickPVR-qlgenerator.pkg
+          cp LICENSE.txt pkg-resources/
+          productbuild --distribution packaging/macos/distribution.xml \
+            --package-path pkg-build --resources pkg-resources "$PACKAGE-qlgenerator.pkg"
+          pkgutil --payload-files "$PACKAGE-qlgenerator.pkg" \
+            | grep -Fx ./Library/QuickLook/QuickPVR.qlgenerator/Contents/MacOS/QuickPVR
+      - name: 'Package the converter'
+        run: |
+          tar -C staging/usr/local -czf "$PACKAGE.tar.gz" bin share
+          tar -tzf "$PACKAGE.tar.gz"
+      - if: "github.event_name != 'pull_request'"
+        name: 'Attest the packages'
+        uses: 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
+        with:
+          subject-path: |
+            QuickPVR-*.dmg
+            quickpvr-*.pkg
+            quickpvr-*.tar.gz
+            quickpvr-*.zip
+      - name: 'Upload the packages'
+        uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        with:
+          if-no-files-found: 'error'
+          name: '${{ env.PACKAGE }}'
+          path: |
+            QuickPVR-${{ needs.version.outputs.version }}-macos-universal-Release.dmg
+            ${{ env.PACKAGE }}-qlgenerator.pkg
+            ${{ env.PACKAGE }}.tar.gz
+            ${{ env.PACKAGE }}-symbols.zip
+  # On a tag, the packages go to a draft release, which the Release workflow publishes once every
+  # workflow of the commit succeeds.
+  release:
+    if: "github.ref_type == 'tag'"
+    name: 'Attach to the release'
+    needs: ['linux', 'macos', 'windows']
+    permissions:
+      contents: 'write'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/download-artifact@9000827ccba6bdab643e8b6fd33ac0654aef8333'
+        with:
+          merge-multiple: true
+          path: 'packages'
+          pattern: 'quickpvr-*-Release'
+      - name: 'List the packages'
+        run: |
+          find packages -maxdepth 1 -type f | sort > packages.txt
+          cat packages.txt
+      - env:
+          GH_REPO: '${{ github.repository }}'
+          GH_TOKEN: '${{ github.token }}'
+          TAG: '${{ github.ref_name }}'
+        name: 'Upload to the draft release'
+        run: |
+          gh release view "$TAG" > /dev/null 2>&1 \
+            || gh release create "$TAG" --draft --notes '' --title "$TAG" --verify-tag
+          xargs -d '\n' gh release upload "$TAG" --clobber < packages.txt
+  version:
+    name: 'Package version'
+    outputs:
+      version: '${{ steps.version.outputs.version }}'
+    runs-on: 'ubuntu-latest'
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+      - id: 'version'
+        name: 'Select the tag or seven-character SHA'
+        run: |
+          version="${GITHUB_SHA:0:7}"
+          if tag=$(git describe --tags --exact-match HEAD 2> /dev/null); then
+            version="v${tag#v}"
+            version="${version//\//-}"
+          fi
+          printf 'version=%s\n' "$version" >> "$GITHUB_OUTPUT"
+  windows:
+    env:
+      PACKAGE: 'quickpvr-${{ needs.version.outputs.version }}-${{ matrix.platform.slug }}-Release'
+    name: '${{ matrix.platform.name }}'
+    needs: 'version'
+    permissions:
+      attestations: 'write'
+      contents: 'read'
+      id-token: 'write'
+    runs-on: '${{ matrix.platform.os }}'
+    steps:
+      - uses: 'actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1'
+        with:
+          persist-credentials: false
+      # The runtime is linked statically, so neither Explorer nor the converter needs the Visual C++
+      # redistributable. The policy defaults apply the runtime and the debugging information format
+      # to the fetched dependencies too.
+      - name: 'Configure and compile'
+        run: |
+          cmake -S . -B build -A $env:CMAKE_ARCHITECTURE -DBUILD_TESTING=OFF `
+            -DFETCHCONTENT_TRY_FIND_PACKAGE_MODE=NEVER `
+            -DCMAKE_POLICY_DEFAULT_CMP0091=NEW -DCMAKE_POLICY_DEFAULT_CMP0141=NEW `
+            -DCMAKE_MSVC_RUNTIME_LIBRARY=MultiThreaded `
+            -DCMAKE_MSVC_DEBUG_INFORMATION_FORMAT=ProgramDatabase `
+            '-DCMAKE_EXE_LINKER_FLAGS=/DEBUG /OPT:REF /OPT:ICF' `
+            '-DCMAKE_SHARED_LINKER_FLAGS=/DEBUG /OPT:REF /OPT:ICF'
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --build build --config Release --parallel
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          cmake --install build --config Release --prefix staging
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        env:
+          CMAKE_ARCHITECTURE: '${{ matrix.platform.cmake_architecture }}'
+        shell: 'pwsh'
+      - name: 'Verify the installed converter'
+        run: |
+          $originalPath = $env:PATH
+          try {
+            $env:PATH = "$env:SystemRoot\System32;$env:SystemRoot"
+            & .\staging\bin\pvr2png.exe --info pvrsamples\dreamcast\logo_argb4444_twiddled.pvr
+            if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+          } finally {
+            $env:PATH = $originalPath
+          }
+        shell: 'pwsh'
+      - name: 'Package'
+        run: |
+          Copy-Item LICENSE.txt staging/
+          Compress-Archive -Path staging\* -DestinationPath "$env:PACKAGE.zip"
+          New-Item -ItemType Directory symbols | Out-Null
+          foreach ($name in 'pvr2png.pdb', 'QuickPVRShell.pdb') {
+            $pdb = @(Get-ChildItem build -Recurse -Filter $name |
+              Where-Object { $_.Directory.Name -eq 'Release' })
+            if ($pdb.Count -ne 1) { throw "Found $($pdb.Count) copies of $name." }
+            Copy-Item $pdb[0].FullName symbols/
+          }
+          Compress-Archive -Path symbols\* -DestinationPath "$env:PACKAGE-symbols.zip"
+        shell: 'pwsh'
+      # NSIS is on the x64 runner but not always on the Arm runner.
+      - name: 'Build the installer'
+        run: |
+          $nsis = "${env:ProgramFiles(x86)}\NSIS"
+          if (-not (Test-Path "$nsis\makensis.exe")) { choco install nsis -y --no-progress }
+          $version = (Select-String -Path build\CMakeCache.txt `
+            -Pattern '^CMAKE_PROJECT_VERSION:STATIC=(.+)$').Matches[0].Groups[1].Value
+          & "$nsis\makensis.exe" -V2 "-DVERSION=$version" "-DARCH=$env:NSIS_ARCHITECTURE" `
+            "-DSTAGING=$PWD\staging" "-DSOURCE_DIR=$PWD" "-DOUTFILE=$PWD\$env:PACKAGE-setup.exe" `
+            packaging\windows\quickpvr.nsi
+          if ($LASTEXITCODE -ne 0) { exit $LASTEXITCODE }
+        env:
+          NSIS_ARCHITECTURE: '${{ matrix.platform.nsis_architecture }}'
+        shell: 'pwsh'
+      - name: 'Verify the installer'
+        run: |
+          $directory = "$env:LOCALAPPDATA\Programs\QuickPVR"
+          $thumbnailProvider = '{3E28DA40-B072-4328-821D-F2A390548485}'
+          $server = "HKCU:\Software\Classes\CLSID\$thumbnailProvider\InprocServer32"
+          $setup = Start-Process -FilePath ".\$env:PACKAGE-setup.exe" -ArgumentList '/S' `
+            -Wait -PassThru
+          if ($setup.ExitCode -ne 0) { throw "Setup exited with $($setup.ExitCode)." }
+          foreach ($name in 'pvr2png.exe', 'QuickPVRShell.dll', 'uninstall.exe') {
+            if (-not (Test-Path "$directory\$name")) { throw "Setup did not install $name." }
+          }
+          $registered = (Get-ItemProperty $server).'(default)'
+          if ($registered -ne "$directory\QuickPVRShell.dll") {
+            throw "The thumbnail provider is registered as '$registered'."
+          }
+          $uninstall = Start-Process -FilePath "$directory\uninstall.exe" `
+            -ArgumentList '/S', "_?=$directory" -Wait -PassThru
+          if ($uninstall.ExitCode -ne 0) { throw "Uninstall exited with $($uninstall.ExitCode)." }
+          if (Test-Path $server) { throw 'Uninstall left the thumbnail provider registered.' }
+          if (Test-Path "$directory\QuickPVRShell.dll") { throw 'Uninstall left the DLL.' }
+        shell: 'pwsh'
+      - if: "github.event_name != 'pull_request'"
+        name: 'Attest the packages'
+        uses: 'actions/attest-build-provenance@4d101475d8b20a2381f78447822ac1eab6504dd8'
+        with:
+          subject-path: |
+            quickpvr-*.exe
+            quickpvr-*.zip
+      - name: 'Upload the packages'
+        uses: 'actions/upload-artifact@cf430e030ddbb5b0abf93d22962f4752f3646cd9'
+        with:
+          if-no-files-found: 'error'
+          name: '${{ env.PACKAGE }}'
+          path: |
+            ${{ env.PACKAGE }}.zip
+            ${{ env.PACKAGE }}-setup.exe
+            ${{ env.PACKAGE }}-symbols.zip
+    strategy:
+      fail-fast: false
+      matrix:
+        platform:
+          - cmake_architecture: 'x64'
+            name: 'Windows x86-64'
+            nsis_architecture: 'x64'
+            os: 'windows-latest'
+            slug: 'windows-x86-64'
+          - cmake_architecture: 'ARM64'
+            name: 'Windows aarch64'
+            nsis_architecture: 'arm64'
+            os: 'windows-11-arm'
+            slug: 'windows-aarch64'
+name: 'Build'
+'on':
+  pull_request:
+    branches:
+      - 'master'
+  push:
+    branches:
+      - 'master'
+    tags:
+      - 'v*.*.*'
+permissions:
+  contents: 'read'

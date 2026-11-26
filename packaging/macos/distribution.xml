@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<installer-gui-script minSpecVersion="2">
+  <title>QuickPVR QuickLook Generator</title>
+  <license file="LICENSE.txt" />
+  <options customize="never" hostArchitectures="arm64,x86_64" require-scripts="false" />
+  <domains enable_anywhere="false" enable_currentUserHome="false" enable_localSystem="true" />
+  <allowed-os-versions>
+    <os-version before="15.0" min="12.0" />
+  </allowed-os-versions>
+  <choices-outline>
+    <line choice="sh.tat.quickpvr.qlgenerator" />
+  </choices-outline>
+  <choice id="sh.tat.quickpvr.qlgenerator" title="QuickPVR QuickLook Generator">
+    <pkg-ref id="sh.tat.quickpvr.qlgenerator" />
+  </choice>
+  <pkg-ref id="sh.tat.quickpvr.qlgenerator">QuickPVR-qlgenerator.pkg</pkg-ref>
+</installer-gui-script>

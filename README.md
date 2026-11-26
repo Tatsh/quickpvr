@@ -51,6 +51,23 @@ Some PVR v2 files written for OpenGL, including the Limbic samples in `pvrsample
 bottom-up without the vertical-flip flag and appear upside down. The header does not
 distinguish them from files stored top-down.
 
+## Downloads
+
+Each [release](https://github.com/Tatsh/quickpvr/releases) has these packages:
+
+| Package                                        | Contents                                                       |
+| ---------------------------------------------- | -------------------------------------------------------------- |
+| `QuickPVR-*-macos-universal-Release.dmg`       | QuickPVR.app with its QuickLook extensions, for macOS 12+.     |
+| `quickpvr-*-macos-universal-*-qlgenerator.pkg` | The legacy generator in `/Library/QuickLook`, for macOS 12–14. |
+| `quickpvr-*-macos-universal-Release.tar.gz`    | `pvr2png` and its manual page.                                 |
+| `quickpvr-*-windows-*-Release-setup.exe`       | `pvr2png` and the Explorer handlers, installed per user.       |
+| `quickpvr-*-windows-*-Release.zip`             | The same files, to register with `regsvr32` by hand.           |
+| `quickpvr-*-linux-x86-64-Release.tar.gz`       | `pvr2png`, the Qt plugin, and the thumbnailer, under `/usr`.   |
+
+The packages are not notarised or signed by a known publisher, so macOS and Windows warn before
+opening them. The Linux package is built on the latest Ubuntu and needs its versions of Qt and KDE
+Frameworks. The packages ending in `-symbols` hold the debugging information.
+
 ## Building
 
 Building requires CMake 3.25 or later and a C++23 compiler with `std::expected` (Clang 17, GCC 13, or

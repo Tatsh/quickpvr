@@ -1,0 +1,140 @@
+concurrency:
+  cancel-in-progress: false
+  group: '${{ github.workflow }}-${{ github.event.workflow_run.head_sha }}'
+env:
+  GH_REPO: '${{ github.repository }}'
+  GH_TOKEN: '${{ github.token }}'
+jobs:
+  publish-release:
+    name: 'Publish the release'
+    permissions:
+      actions: 'read'
+      contents: 'write'
+    runs-on: 'ubuntu-latest'
+    steps:
+      # A run follows each workflow of every commit. It goes on only for a commit a v* tag names,
+      # after the workflow that triggered it succeeded.
+      - env:
+          HEAD_SHA: '${{ github.event.workflow_run.head_sha }}'
+          TRIGGER_CONCLUSION: '${{ github.event.workflow_run.conclusion }}'
+        id: 'guard'
+        name: 'Find the tag of the commit'
+        run: |
+          if [[ "$TRIGGER_CONCLUSION" != 'success' ]]; then
+            echo "The triggering workflow concluded with '${TRIGGER_CONCLUSION}'."
+            exit 0
+          fi
+          tag=''
+          while IFS=$'\t' read -r ref obj_type obj_sha; do
+            [[ -z "$ref" ]] && continue
+            if [[ "$obj_type" == 'commit' ]]; then
+              target_sha="$obj_sha"
+            else
+              target_sha=$(gh api "repos/${GH_REPO}/git/tags/${obj_sha}" --jq '.object.sha' \
+                2> /dev/null || echo '')
+            fi
+            if [[ "$target_sha" == "$HEAD_SHA" ]]; then
+              tag="${ref#refs/tags/}"
+              break
+            fi
+          done < <(gh api "repos/${GH_REPO}/git/matching-refs/tags/v" \
+            --jq '.[] | [.ref, .object.type, .object.sha] | @tsv')
+          if [[ -z "$tag" ]]; then
+            echo "No v* tag names ${HEAD_SHA}."
+            exit 0
+          fi
+          echo "The tag of ${HEAD_SHA} is ${tag}."
+          echo "tag=${tag}" >> "$GITHUB_OUTPUT"
+      # Build attaches the packages, so the release waits for it. A check that did not run for the
+      # commit is skipped.
+      - env:
+          HEAD_SHA: '${{ github.event.workflow_run.head_sha }}'
+          TAG: '${{ steps.guard.outputs.tag }}'
+        id: 'check'
+        if: "steps.guard.outputs.tag != ''"
+        name: 'Check that every workflow succeeded'
+        run: |
+          ready=true
+          for workflow in Build CodeQL Prettier Spelling Tests clang-format markdownlint; do
+            run=$(gh run list --workflow "$workflow" --commit "$HEAD_SHA" \
+              --json status,conclusion --jq '.[0]')
+            if [[ -z "$run" || "$run" == 'null' ]]; then
+              if [[ "$workflow" == 'Build' ]]; then
+                echo 'Build has not run for this commit yet.'
+                ready=false
+              else
+                echo "${workflow} did not run for this commit."
+              fi
+              continue
+            fi
+            status=$(jq -r '.status' <<< "$run")
+            conclusion=$(jq -r '.conclusion' <<< "$run")
+            case "$conclusion" in
+              failure | cancelled | timed_out | startup_failure | action_required)
+                echo "::error::${workflow} concluded with '${conclusion}'."
+                exit 1
+                ;;
+              success | skipped | neutral) ;;
+              *)
+                if [[ "$status" == 'completed' ]]; then
+                  echo "::error::${workflow} completed with '${conclusion}'."
+                  exit 1
+                fi
+                echo "${workflow} is still ${status}."
+                ready=false
+                ;;
+            esac
+          done
+          if [[ "$ready" == 'true' ]]; then
+            echo "Every workflow succeeded for ${TAG}."
+            echo 'ready=true' >> "$GITHUB_OUTPUT"
+          fi
+      - env:
+          TAG: '${{ steps.guard.outputs.tag }}'
+        if: "steps.check.outputs.ready == 'true'"
+        name: 'Check that every package is attached'
+        run: |
+          required=(
+            "quickpvr-${TAG}-linux-x86-64-Release.tar.gz"
+            "quickpvr-${TAG}-linux-x86-64-Release-symbols.tar.gz"
+            "QuickPVR-${TAG}-macos-universal-Release.dmg"
+            "quickpvr-${TAG}-macos-universal-Release-qlgenerator.pkg"
+            "quickpvr-${TAG}-macos-universal-Release.tar.gz"
+            "quickpvr-${TAG}-macos-universal-Release-symbols.zip"
+          )
+          for platform in windows-x86-64 windows-aarch64; do
+            required+=("quickpvr-${TAG}-${platform}-Release.zip")
+            required+=("quickpvr-${TAG}-${platform}-Release-setup.exe")
+            required+=("quickpvr-${TAG}-${platform}-Release-symbols.zip")
+          done
+          mapfile -t attached < <(gh release view "$TAG" --json assets --jq '.assets[].name')
+          echo "${TAG} has ${#attached[@]} packages attached."
+          missing=0
+          for name in "${required[@]}"; do
+            if ! printf '%s\n' "${attached[@]}" | grep -Fxq "$name"; then
+              echo "::error::${TAG} has no ${name}."
+              missing=$((missing + 1))
+            fi
+          done
+          if [[ "$missing" -gt 0 ]]; then
+            echo "::error::${missing} packages are missing, and ${TAG} stays a draft."
+            exit 1
+          fi
+          for name in "${attached[@]}"; do
+            if ! printf '%s\n' "${required[@]}" | grep -Fxq "$name"; then
+              echo "::error::${TAG} has an unexpected asset ${name}." \
+                'Only Release packages and symbols are allowed.'
+              exit 1
+            fi
+          done
+      - env:
+          TAG: '${{ steps.guard.outputs.tag }}'
+        if: "steps.check.outputs.ready == 'true'"
+        name: 'Publish the release'
+        run: 'gh release edit "$TAG" --draft=false'
+name: 'Release'
+'on':
+  workflow_run:
+    types: ['completed']
+    workflows: ['Build', 'CodeQL', 'Prettier', 'Spelling', 'Tests', 'clang-format', 'markdownlint']
+permissions: {}
