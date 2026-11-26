@@ -53,6 +53,15 @@ jobs:
         uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
         with:
           category: '/language:c-cpp/os:linux'
+          output: '${{ runner.temp }}/codeql-sarif'
+          upload: 'never'
+      - name: 'Drop results in fetched dependencies'
+        run: '.github/scripts/drop-build-results.sh "$RUNNER_TEMP/codeql-sarif"'
+      - name: 'Upload CodeQL results'
+        uses: 'github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          category: '/language:c-cpp/os:linux'
+          sarif_file: '${{ runner.temp }}/codeql-sarif'
   macos:
     name: 'C/C++ (macOS)'
     permissions:
@@ -82,6 +91,15 @@ jobs:
         uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
         with:
           category: '/language:c-cpp/os:macos'
+          output: '${{ runner.temp }}/codeql-sarif'
+          upload: 'never'
+      - name: 'Drop results in fetched dependencies'
+        run: '.github/scripts/drop-build-results.sh "$RUNNER_TEMP/codeql-sarif"'
+      - name: 'Upload CodeQL results'
+        uses: 'github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          category: '/language:c-cpp/os:macos'
+          sarif_file: '${{ runner.temp }}/codeql-sarif'
   windows:
     name: 'C/C++ (Windows)'
     permissions:
@@ -107,6 +125,16 @@ jobs:
         uses: 'github/codeql-action/analyze@915412ff23e8b7659517e607487dbeae018f2934'
         with:
           category: '/language:c-cpp/os:windows'
+          output: '${{ runner.temp }}/codeql-sarif'
+          upload: 'never'
+      - name: 'Drop results in fetched dependencies'
+        run: '.github/scripts/drop-build-results.sh "$RUNNER_TEMP/codeql-sarif"'
+        shell: 'bash'
+      - name: 'Upload CodeQL results'
+        uses: 'github/codeql-action/upload-sarif@915412ff23e8b7659517e607487dbeae018f2934'
+        with:
+          category: '/language:c-cpp/os:windows'
+          sarif_file: '${{ runner.temp }}/codeql-sarif'
 name: 'CodeQL'
 'on':
   pull_request:
