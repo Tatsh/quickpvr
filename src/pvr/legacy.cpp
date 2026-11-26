@@ -176,6 +176,21 @@ std::optional<std::string_view> compressedName(PixelType type) {
     }
 }
 
+// Every compressed type has a fixed rate. DXT2 to DXT5 store 16 bytes per 4x4 block.
+std::uint32_t compressedBitsPerPixel(PixelType type) {
+    switch (type) {
+    case PixelType::Pvrtc2:
+    case PixelType::OpenGlPvrtc2:
+        return 2;
+    case PixelType::Pvrtc4:
+    case PixelType::OpenGlPvrtc4:
+    case PixelType::Dxt1:
+        return 4;
+    default:
+        return 8;
+    }
+}
+
 std::expected<void, Error> decodeCompressed(Bytes body, PixelType type, Image &image) {
     switch (type) {
     case PixelType::Pvrtc2:
@@ -272,6 +287,7 @@ std::expected<DecodeResult, Error> decodeLegacy(Bytes data, const Options &optio
         if (!image) {
             return std::unexpected(image.error());
         }
+        image->bitsPerPixel = compressedBitsPerPixel(type);
         if (const auto decoded = decodeCompressed(body, type, *image); !decoded) {
             return std::unexpected(decoded.error());
         }
@@ -301,6 +317,7 @@ std::expected<DecodeResult, Error> decodeLegacy(Bytes data, const Options &optio
         if (!image) {
             return std::unexpected(image.error());
         }
+        image->bitsPerPixel = layout->bits;
         if (const auto decoded = decodeMasked(body, header, *layout, *image); !decoded) {
             return std::unexpected(decoded.error());
         }
@@ -342,6 +359,7 @@ std::expected<DecodeResult, Error> decodeApplePvrtc(Bytes data, const Options &o
     if (!image) {
         return std::unexpected(image.error());
     }
+    image->bitsPerPixel = twoBitsPerPixel ? 2 : 4;
     if (const auto decoded = decodePvrtc(data, twoBitsPerPixel, *image); !decoded) {
         return std::unexpected(decoded.error());
     }

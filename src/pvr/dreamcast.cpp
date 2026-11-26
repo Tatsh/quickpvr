@@ -151,6 +151,21 @@ bool isPalettized(const Layout &layout) {
     return layout.kind == LayoutKind::Indices4 || layout.kind == LayoutKind::Indices8;
 }
 
+// VQ stores one byte per 2x2 block, not counting the codebook.
+std::uint32_t bitsPerPixel(const Layout &layout) {
+    switch (layout.kind) {
+    case LayoutKind::Texels:
+        return 16;
+    case LayoutKind::VectorQuantized:
+        return 2;
+    case LayoutKind::Indices4:
+        return 4;
+    case LayoutKind::Indices8:
+        return 8;
+    }
+    return 0;
+}
+
 Color bumpColor(std::uint32_t texel) {
     // The high byte is the elevation (0 is flat, 255 is vertical) and the low byte the
     // rotation. The colour is the resulting unit normal mapped to [0, 255].
@@ -471,6 +486,7 @@ decodeChunk(Bytes data, const ChunkLocation &location, const Options &options) {
     if (!image) {
         return image;
     }
+    image->bitsPerPixel = bitsPerPixel(*layout);
 
     // Texture data runs from the end of the header to the end of the chunk. Clamp to the bytes
     // present because packs may record a longer chunk.

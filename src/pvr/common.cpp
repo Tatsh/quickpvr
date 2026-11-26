@@ -287,6 +287,28 @@ std::string_view containerName(Container container) {
     return "unknown";
 }
 
+Details describe(const DecodeResult &result) {
+    Details details;
+    details.container = result.container;
+    details.textureCount = result.images.size();
+    if (result.images.size() == 1 && result.container != Container::DreamcastPack) {
+        const auto &image = result.images.front();
+        details.width = image.width;
+        details.height = image.height;
+        details.bitsPerPixel = image.bitsPerPixel;
+        details.format = image.format;
+        return details;
+    }
+    for (const auto &image : result.images) {
+        if (!details.format.empty()) {
+            details.format += "; ";
+        }
+        details.format +=
+            std::to_string(image.width) + "x" + std::to_string(image.height) + " " + image.format;
+    }
+    return details;
+}
+
 std::string_view version() {
     return PVR_VERSION;
 }

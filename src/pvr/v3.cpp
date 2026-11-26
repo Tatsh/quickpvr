@@ -335,6 +335,33 @@ bool isDecodable(std::uint32_t id) {
     return false;
 }
 
+// The packed YUV and RGBG formats store two pixels in 32 bits. BC2, BC3, and BC5 store 16 bytes
+// per 4x4 block, and the others 8 bytes.
+std::uint32_t compressedBitsPerPixel(CompressedFormat format) {
+    switch (format) {
+    case CompressedFormat::Pvrtc2Rgb:
+    case CompressedFormat::Pvrtc2Rgba:
+        return 2;
+    case CompressedFormat::Pvrtc4Rgb:
+    case CompressedFormat::Pvrtc4Rgba:
+    case CompressedFormat::Bc1:
+    case CompressedFormat::Bc4:
+        return 4;
+    case CompressedFormat::Dxt2:
+    case CompressedFormat::Bc2:
+    case CompressedFormat::Dxt4:
+    case CompressedFormat::Bc3:
+    case CompressedFormat::Bc5:
+        return 8;
+    case CompressedFormat::Uyvy:
+    case CompressedFormat::Yuy2:
+    case CompressedFormat::Rgbg8888:
+    case CompressedFormat::Grgb8888:
+        return 16;
+    }
+    return 0;
+}
+
 struct Orientation {
     bool flipX{};
     bool flipY{};
@@ -426,6 +453,7 @@ std::expected<DecodeResult, Error> decodeVersion3(Bytes data, const Options &opt
             return std::unexpected(image.error());
         }
         const auto format = static_cast<CompressedFormat>(id);
+        image->bitsPerPixel = compressedBitsPerPixel(format);
         if (const auto decoded = decodeCompressed(body, format, *image); !decoded) {
             return std::unexpected(decoded.error());
         }
@@ -441,6 +469,7 @@ std::expected<DecodeResult, Error> decodeVersion3(Bytes data, const Options &opt
         if (!image) {
             return std::unexpected(image.error());
         }
+        image->bitsPerPixel = format->totalBits;
         if (const auto decoded = decodeUncompressed(body, *format, channelType, *image); !decoded) {
             return std::unexpected(decoded.error());
         }

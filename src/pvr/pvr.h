@@ -71,6 +71,8 @@ struct Image {
     std::uint32_t height{};         /*!< Height in pixels. */
     std::vector<std::uint8_t> rgba; /*!< `width * height * 4` bytes in top-down rows. */
     std::string format;             /*!< Description of the source pixel format. */
+    /** Bits per pixel of the source data, such as 16 for ARGB4444. It is 0 for a contact sheet. */
+    std::uint32_t bitsPerPixel{};
 };
 
 /** A texture in a pack that could not be decoded. */
@@ -84,6 +86,20 @@ struct DecodeResult {
     Container container{};             /*!< Container the data was read as. */
     std::vector<Image> images;         /*!< One image, or one per decoded texture of a pack. */
     std::vector<PackFailure> failures; /*!< Pack entries that could not be decoded. */
+};
+
+/** Facts about a decoded file, for the details views of file managers. */
+struct Details {
+    Container container{};                     /*!< Container the data was read as. */
+    std::size_t textureCount{};                /*!< Number of decoded textures. */
+    std::optional<std::uint32_t> width;        /*!< Width of a single texture. */
+    std::optional<std::uint32_t> height;       /*!< Height of a single texture. */
+    std::optional<std::uint32_t> bitsPerPixel; /*!< Bits per pixel of a single texture. */
+    /**
+     * Pixel format of a single texture, such as `ARGB4444, twiddled`. For a pack, it lists the size
+     * and format of each texture, separated by semicolons.
+     */
+    std::string format;
 };
 
 /** Decoder settings. */
@@ -146,6 +162,14 @@ std::expected<Image, Error> contactSheet(std::span<const Image> images,
  * @return A name such as `PVR v3`.
  */
 std::string_view containerName(Container container);
+
+/**
+ * Summarise a decoded file for the details views of file managers.
+ *
+ * @param result The decoded file.
+ * @return The details. Width, height, and bits per pixel are set only for a single texture.
+ */
+Details describe(const DecodeResult &result);
 
 /**
  * Library version.

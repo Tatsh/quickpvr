@@ -9,6 +9,7 @@
 #include <sstream>
 #include <string>
 #include <string_view>
+#include <utility>
 #include <vector>
 
 #include "pvr/pvr.h"
@@ -315,6 +316,42 @@ TEST(applePvrtcDetection) {
     REQUIRE_VALUE(fourBit, Pvr::decode(readSample("pvr2/apple_4bpp.pvr")));
     CHECK(fourBit->images[0].format == "PVRTC 4bpp");
     CHECK_EQ(fourBit->images[0].width, 256U);
+}
+
+TEST(reportsBitsPerPixel) {
+    const std::pair<std::string_view, std::uint32_t> samples[] = {
+        {"brighterday.pvr", 16},
+        {"pvr2/RGB888.pvr", 24},
+        {"pvr2/RGBA8888.pvr", 32},
+        {"pvr2/I8.pvr", 8},
+        {"pvr2/pvrtc2bpp.pvr", 2},
+        {"pvr2/apple_4bpp.pvr", 4},
+        {"dreamcast/logo_argb4444_twiddled.pvr", 16},
+        {"dreamcast/logo_pal8.pvr", 8},
+    };
+    for (const auto &[name, bits] : samples) {
+        REQUIRE_VALUE(result, Pvr::decode(readSample(name)));
+        CHECK_EQ(result->images[0].bitsPerPixel, bits);
+    }
+}
+
+TEST(describesFiles) {
+    REQUIRE_VALUE(texture, Pvr::decode(readSample("dreamcast/logo_argb4444_twiddled.pvr")));
+    const auto single = Pvr::describe(*texture);
+    CHECK(single.container == Pvr::Container::Dreamcast);
+    CHECK_EQ(single.textureCount, std::size_t{1});
+    CHECK_EQ(single.width.value_or(0), 256U);
+    CHECK_EQ(single.height.value_or(0), 256U);
+    CHECK_EQ(single.bitsPerPixel.value_or(0), 16U);
+    CHECK(single.format == "ARGB4444, twiddled, global index 1");
+
+    REQUIRE_VALUE(pack, Pvr::decode(readSample("dreamcast/PACK_T.PVR")));
+    const auto sheet = Pvr::describe(*pack);
+    CHECK(sheet.container == Pvr::Container::DreamcastPack);
+    CHECK_EQ(sheet.textureCount, std::size_t{2});
+    CHECK(!sheet.width && !sheet.height && !sheet.bitsPerPixel);
+    CHECK(sheet.format == "256x256 texture 0: ARGB4444, twiddled; "
+                          "256x64 texture 1: RGB565, twiddled rectangle");
 }
 
 // PowerVR version 3.
