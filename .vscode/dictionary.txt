@@ -104,6 +104,7 @@ kdec
 kfilemetadata
 lastexitcode
 ldai
+libera
 libgcc
 libkf
 libpvr
