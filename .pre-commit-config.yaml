@@ -11,6 +11,7 @@ default_install_hook_types:
   - 'pre-push'
   - 'post-checkout'
   - 'post-merge'
+exclude: "^src/(macos/qlgenerator/main\\.c|pvr/pvrtc\\.cpp)$"
 repos:
   - hooks:
       - exclude: "yarn-\\d+.*\\.cjs$"

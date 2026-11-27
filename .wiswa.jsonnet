@@ -85,4 +85,7 @@
       { name: 'stb' },
     ],
   },
+  pre_commit_config+: {
+    exclude: '^src/(macos/qlgenerator/main\\.c|pvr/pvrtc\\.cpp)$',
+  },
 }
